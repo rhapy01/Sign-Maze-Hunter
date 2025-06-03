@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 // CORS configuration for Render deployment
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? ['https://your-app-name.onrender.com'] // Replace with your Render app URL
+        ? ['https://sign-maze-hunter.onrender.com'] // Your actual Render app URL
         : ['http://localhost:3000', 'http://127.0.0.1:3000'],
     credentials: true
 }));
@@ -37,14 +37,55 @@ const connectDB = async () => {
             throw new Error('MongoDB connection string not provided in environment variables');
         }
 
-        await mongoose.connect(mongoURI, {
-    useNewUrlParser: true,
+        // Primary connection options with full SSL
+        const primaryOptions = {
+            useNewUrlParser: true,
             useUnifiedTopology: true,
             serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
             socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-        });
+            // SSL/TLS configuration for MongoDB Atlas
+            ssl: true,
+            sslValidate: true,
+            retryWrites: true,
+            w: 'majority',
+            // Additional options for Render compatibility
+            authSource: 'admin',
+            maxPoolSize: 10,
+            minPoolSize: 5,
+            maxIdleTimeMS: 30000,
+            connectTimeoutMS: 10000,
+            // Force TLS version for compatibility
+            tlsInsecure: false,
+            tlsAllowInvalidCertificates: false,
+            tlsAllowInvalidHostnames: false
+        };
+
+        // Fallback options with relaxed SSL (if needed)
+        const fallbackOptions = {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+            retryWrites: true,
+            w: 'majority',
+            authSource: 'admin',
+            ssl: true,
+            tlsInsecure: true, // Allow insecure connections as fallback
+            tlsAllowInvalidCertificates: true,
+            tlsAllowInvalidHostnames: true
+        };
+
+        try {
+            // Try primary connection first
+            await mongoose.connect(mongoURI, primaryOptions);
+            console.log('✅ Connected to MongoDB successfully (secure connection)');
+        } catch (sslError) {
+            console.log('⚠️ Primary SSL connection failed, trying fallback...');
+            // If SSL fails, try with relaxed options
+            await mongoose.connect(mongoURI, fallbackOptions);
+            console.log('✅ Connected to MongoDB successfully (fallback connection)');
+        }
         
-        console.log('✅ Connected to MongoDB successfully');
     } catch (error) {
         console.error('❌ MongoDB connection error:', error.message);
         // Don't exit the process, let it retry
