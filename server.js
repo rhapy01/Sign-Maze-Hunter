@@ -45,6 +45,8 @@ const connectDB = async () => {
             socketTimeoutMS: 45000,
             retryWrites: true,
             w: 'majority',
+            ssl: true,
+            sslValidate: true,
             authSource: 'admin',
             maxPoolSize: 10,
             minPoolSize: 5,
@@ -58,11 +60,12 @@ const connectDB = async () => {
             useUnifiedTopology: true,
             serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
-            retryWrites: true,
-            w: 'majority',
-            authSource: 'admin',
+            ssl: true,
+            sslValidate: false,
             tlsAllowInvalidCertificates: true,
-            tlsAllowInvalidHostnames: true
+            tlsAllowInvalidHostnames: true,
+            retryWrites: true,
+            w: 'majority'
         };
 
         // Strategy 3: No SSL enforcement (last resort)
@@ -71,9 +74,9 @@ const connectDB = async () => {
             useUnifiedTopology: true,
             serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
+            ssl: false,
             retryWrites: true,
-            w: 'majority',
-            authSource: 'admin'
+            w: 'majority'
         };
 
         try {
