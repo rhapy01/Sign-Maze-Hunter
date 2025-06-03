@@ -220,7 +220,7 @@ function updateLeaderboardTable(scores, pagination) {
         row.innerHTML = `
             <td class="rank ${rankClass}">#${globalRank}</td>
             <td class="player-name ${verificationClass}">
-                ${escapeHtml(entry.playerName)}${verificationIcon}
+                ${escapeHtml(entry.signId || entry.playerName)}${verificationIcon}
             </td>
             <td class="score">${entry.score.toLocaleString()}</td>
             <td class="level">Level ${entry.level}</td>
@@ -228,12 +228,12 @@ function updateLeaderboardTable(scores, pagination) {
             <td class="stats">${entry.treasuresFound || 0}</td>
             <td class="date">${formatDate(entry.createdAt || entry.date)}</td>
             <td class="actions">
-                <button onclick="viewPlayerStats('${entry.playerName}')" class="stats-btn">Stats</button>
+                <button onclick="viewPlayerStats('${entry.signId || entry.playerName}')" class="stats-btn">Stats</button>
             </td>
         `;
         
         // Add hover effect for additional stats
-        let tooltip = `Submitted: ${formatDate(entry.createdAt || entry.date)}`;
+        let tooltip = `Player ID: ${entry.signId || entry.playerName}\nSubmitted: ${formatDate(entry.createdAt || entry.date)}`;
         if (entry.gameTime) {
             tooltip += `\nGame Time: ${formatTime(entry.gameTime)}`;
         }

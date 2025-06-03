@@ -138,11 +138,24 @@ const anonymousUserSchema = new mongoose.Schema({
         unique: true,
         index: true
     },
+    signId: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true,
+        match: /^SIGN[A-Z]{4}$/,
+        default: function() {
+            return generateSignId();
+        }
+    },
     playerName: { 
         type: String, 
-        required: true,
+        required: false,
         trim: true,
-        maxlength: 50
+        maxlength: 50,
+        default: function() {
+            return this.signId;
+        }
     },
     fingerprint: {
         userAgent: String,
@@ -249,6 +262,16 @@ function generateDeviceId() {
     return crypto.randomBytes(32).toString('hex');
 }
 
+// Helper function to generate unique SIGN ID
+function generateSignId() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let uniqueId = 'SIGN';
+    for (let i = 0; i < 4; i++) {
+        uniqueId += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    return uniqueId;
+}
+
 // Helper function to get client fingerprint
 function getClientFingerprint(req) {
     const userAgent = req.headers['user-agent'] || '';
@@ -274,26 +297,16 @@ function getClientIP(req) {
 app.post('/api/user/identify', async (req, res) => {
     try {
         const { 
-            playerName, 
             fingerprint = {},
             existingDeviceId 
         } = req.body;
-
-        if (!playerName || playerName.trim().length === 0) {
-            return res.status(400).json({ error: 'Player name is required' });
-        }
-
-        // Validate player name
-        if (!/^[a-zA-Z0-9_\-\s]+$/.test(playerName.trim())) {
-            return res.status(400).json({ error: 'Player name contains invalid characters' });
-        }
 
         const clientIP = getClientIP(req);
         const clientFingerprint = getClientFingerprint(req);
 
         let user;
 
-        // If existing device ID provided, try to find and verify user
+        // If existing device ID provided, try to find user
         if (existingDeviceId) {
             user = await AnonymousUser.findOne({ deviceId: existingDeviceId });
             
@@ -313,40 +326,26 @@ app.post('/api/user/identify', async (req, res) => {
                     });
                 }
 
-                // Update player name if changed
-                if (user.playerName !== playerName.trim()) {
-                    user.playerName = playerName.trim();
-                }
-
                 await user.save();
                 
                 return res.json({
                     deviceId: user.deviceId,
-                    playerName: user.playerName,
+                    signId: user.signId,
                     isVerified: user.isVerified,
                     isExisting: true
                 });
             }
         }
 
-        // Check for potential duplicate by name and recent IP/fingerprint
-        const recentUser = await AnonymousUser.findOne({
-            playerName: playerName.trim(),
-            $or: [
-                { 'ipAddresses.ip': clientIP },
-                { 'fingerprint.userAgent': req.headers['user-agent'] }
-            ],
-            createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } // Within 24 hours
-        });
-
-        if (recentUser && !existingDeviceId) {
-            return res.json({
-                deviceId: recentUser.deviceId,
-                playerName: recentUser.playerName,
-                isVerified: recentUser.isVerified,
-                isExisting: true,
-                suggestion: 'Found existing user with same name and device characteristics'
-            });
+        // Generate new SIGN ID and ensure it's unique
+        let signId;
+        let isUnique = false;
+        while (!isUnique) {
+            signId = generateSignId();
+            const existingUser = await AnonymousUser.findOne({ signId });
+            if (!existingUser) {
+                isUnique = true;
+            }
         }
 
         // Create new anonymous user
@@ -354,7 +353,7 @@ app.post('/api/user/identify', async (req, res) => {
         
         user = new AnonymousUser({
             deviceId,
-            playerName: playerName.trim(),
+            signId,
             fingerprint: {
                 userAgent: req.headers['user-agent'] || '',
                 screenResolution: fingerprint.screenResolution || '',
@@ -372,11 +371,11 @@ app.post('/api/user/identify', async (req, res) => {
 
         await user.save();
 
-        console.log(`✅ New anonymous user created: ${playerName} (${deviceId})`);
+        console.log(`✅ New anonymous user created: ${signId} (${deviceId})`);
 
         res.status(201).json({
             deviceId: user.deviceId,
-            playerName: user.playerName,
+            signId: user.signId,
             isVerified: user.isVerified,
             isExisting: false
         });
@@ -509,7 +508,6 @@ app.post('/api/leaderboard', async (req, res) => {
     try {
         const { 
             deviceId,
-            playerName, 
             score, 
             level, 
             gameTime = 0, 
@@ -518,10 +516,10 @@ app.post('/api/leaderboard', async (req, res) => {
         } = req.body;
         
         // Validate required fields
-        if (!deviceId || !playerName || score === undefined || !level) {
+        if (!deviceId || score === undefined || !level) {
             return res.status(400).json({ 
                 error: 'Missing required fields',
-                required: ['deviceId', 'playerName', 'score', 'level']
+                required: ['deviceId', 'score', 'level']
             });
         }
 
@@ -529,11 +527,6 @@ app.post('/api/leaderboard', async (req, res) => {
         const user = await AnonymousUser.findOne({ deviceId });
         if (!user) {
             return res.status(404).json({ error: 'User not found. Please register first.' });
-        }
-
-        // Verify player name matches
-        if (user.playerName !== playerName.trim()) {
-            return res.status(403).json({ error: 'Player name does not match registered user' });
         }
 
         // Additional validation
@@ -570,7 +563,7 @@ app.post('/api/leaderboard', async (req, res) => {
         // Create new leaderboard entry
         const newScore = new Leaderboard({
             deviceId,
-            playerName: playerName.trim(),
+            playerName: user.signId, // Use SIGN ID as player name
             score,
             level,
             gameTime,
@@ -593,6 +586,7 @@ app.post('/api/leaderboard', async (req, res) => {
         const responseScore = {
             _id: savedScore._id,
             playerName: savedScore.playerName,
+            signId: user.signId,
             score: savedScore.score,
             level: savedScore.level,
             gameTime: savedScore.gameTime,
@@ -602,7 +596,7 @@ app.post('/api/leaderboard', async (req, res) => {
             isVerified: savedScore.isVerified
         };
 
-        console.log(`✅ New score saved: ${playerName} - ${score} points (Level ${level}) [${user.isVerified ? 'VERIFIED' : 'UNVERIFIED'}]`);
+        console.log(`✅ New score saved: ${user.signId} - ${score} points (Level ${level}) [${user.isVerified ? 'VERIFIED' : 'UNVERIFIED'}]`);
         res.status(201).json(responseScore);
         
     } catch (error) {
