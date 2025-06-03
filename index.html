@@ -1,0 +1,4587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Maze Adventure</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 50%, #1a1a1a 100%);
+      font-family: 'Arial', sans-serif;
+      color: #FFD700;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden; /* Prevent horizontal scroll */
+      overflow-y: auto; /* Allow vertical scroll */
+    }
+    
+    /* Main Menu Styles */
+    .main-menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      width: 100%;
+      max-width: 1200px;
+      overflow-y: auto;
+      padding: 20px 0;
+      position: relative;
+      background: radial-gradient(ellipse at center, rgba(255, 140, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%);
+    }
+    
+    /* Animated background elements */
+    .main-menu::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 140, 0, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 99, 71, 0.06) 0%, transparent 50%);
+      animation: backgroundFloat 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes backgroundFloat {
+      0%, 100% { transform: translateY(0px); opacity: 0.6; }
+      50% { transform: translateY(-20px); opacity: 0.9; }
+    }
+    
+    .main-menu h1 {
+      font-size: 4.5em;
+      margin-bottom: 10px;
+      text-shadow: 
+        0 0 20px rgba(255, 140, 0, 0.8),
+        0 0 40px rgba(255, 215, 0, 0.6),
+        3px 3px 6px rgba(0,0,0,0.9);
+      background: linear-gradient(45deg, #FF8C00, #FFD700, #FFA500, #FF6347, #FFD700, #FF8C00);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: titleGlow 3s ease-in-out infinite, gradientShift 4s ease-in-out infinite;
+      position: relative;
+      z-index: 10;
+    }
+    
+    @keyframes titleGlow {
+      0%, 100% { 
+        filter: drop-shadow(0 0 20px rgba(255, 140, 0, 0.6));
+        transform: scale(1);
+      }
+      50% { 
+        filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1));
+        transform: scale(1.02);
+      }
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .main-menu .subtitle {
+      font-size: 1.6em;
+      margin-bottom: 50px;
+      opacity: 0.9;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      color: #FFA500;
+      animation: subtitleFloat 6s ease-in-out infinite;
+      font-style: italic;
+      font-weight: 300;
+    }
+    
+    @keyframes subtitleFloat {
+      0%, 100% { transform: translateY(0px); opacity: 0.9; }
+      50% { transform: translateY(-5px); opacity: 1; }
+    }
+    
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 5;
+    }
+    
+    .menu-btn {
+      background: linear-gradient(145deg, rgba(255, 140, 0, 0.9), rgba(255, 99, 71, 0.9));
+      border: 3px solid transparent;
+      background-clip: padding-box;
+      padding: 18px 50px;
+      border-radius: 35px;
+      color: #000000;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 
+        0 8px 25px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.3);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      min-width: 280px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      animation: buttonFloat 6s ease-in-out infinite;
+    }
+    
+    @keyframes buttonFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
+    
+    .menu-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.5s;
+    }
+    
+    .menu-btn:hover::before {
+      left: 100%;
+    }
+    
+    .menu-btn:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 
+        0 15px 35px rgba(255, 140, 0, 0.5),
+        0 8px 20px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.5);
+      border-color: #FFD700;
+    }
+    
+    .menu-btn:active {
+      transform: translateY(-5px) scale(1.02);
+    }
+    
+    .menu-btn.start-btn {
+      background: linear-gradient(145deg, #FFD700, #FFA500, #FF8C00);
+      font-size: 22px;
+      padding: 22px 55px;
+      border: 4px solid #FF8C00;
+      color: #000000;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 
+        0 10px 30px rgba(255, 215, 0, 0.6),
+        0 15px 50px rgba(0,0,0,0.4),
+        inset 0 2px 0 rgba(255,255,255,0.4);
+      animation: startBtnPulse 2s ease-in-out infinite, buttonFloat 6s ease-in-out infinite;
+    }
+    
+    @keyframes startBtnPulse {
+      0%, 100% { 
+        box-shadow: 
+          0 10px 30px rgba(255, 215, 0, 0.6),
+          0 15px 50px rgba(0,0,0,0.4),
+          inset 0 2px 0 rgba(255,255,255,0.4);
+      }
+      50% { 
+        box-shadow: 
+          0 15px 40px rgba(255, 215, 0, 0.9),
+          0 20px 60px rgba(0,0,0,0.5),
+          inset 0 2px 0 rgba(255,255,255,0.6);
+      }
+    }
+    
+    .menu-btn.start-btn:hover {
+      background: linear-gradient(145deg, #FFA500, #FFD700, #FF8C00);
+      transform: translateY(-10px) scale(1.08);
+      box-shadow: 
+        0 20px 50px rgba(255, 215, 0, 0.8),
+        0 25px 70px rgba(0,0,0,0.4);
+    }
+    
+    .menu-btn.instructions-btn {
+      background: linear-gradient(145deg, rgba(255, 99, 71, 0.9), rgba(255, 69, 0, 0.9));
+      border: 3px solid #FFD700;
+      animation-delay: -0.5s;
+    }
+    
+    .menu-btn.credits-btn {
+      background: linear-gradient(145deg, rgba(47, 27, 20, 0.9), rgba(26, 26, 26, 0.9));
+      border: 3px solid #FF8C00;
+      color: #FFD700;
+      animation-delay: -1s;
+    }
+    
+    .menu-btn.character-btn {
+      background: linear-gradient(145deg, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+      border: 3px solid #FFD700;
+      color: #FFD700;
+      animation-delay: -1.5s;
+    }
+    
+    .menu-btn.profile-btn {
+      background: linear-gradient(145deg, rgba(65, 105, 225, 0.9), rgba(30, 144, 255, 0.9));
+      border: 3px solid #FFD700;
+      color: #FFD700;
+      animation-delay: -2s;
+    }
+    
+    .menu-btn.share-btn {
+      background: linear-gradient(145deg, rgba(39, 174, 96, 0.9), rgba(33, 154, 82, 0.9));
+      border: 3px solid #FFD700;
+      color: #FFD700;
+      animation-delay: -2.5s;
+    }
+    
+    .menu-btn.weapon-btn {
+      background: linear-gradient(145deg, rgba(139, 0, 0, 0.9), rgba(220, 20, 60, 0.9));
+      border: 3px solid #FFD700;
+      color: #FFD700;
+      animation-delay: -3s;
+    }
+    
+    .menu-btn.sound-btn {
+      background: linear-gradient(145deg, rgba(255, 140, 0, 0.9), rgba(255, 99, 71, 0.9));
+      border: 3px solid #FFD700;
+      color: #000000;
+      animation-delay: -3.5s;
+    }
+    
+    .game-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      margin-top: 50px;
+      max-width: 900px;
+      position: relative;
+      z-index: 3;
+    }
+    
+    .feature-card {
+      background: rgba(255, 140, 0, 0.15);
+      padding: 25px;
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 215, 0, 0.4);
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      animation: featureFloat 8s ease-in-out infinite;
+    }
+    
+    @keyframes featureFloat {
+      0%, 100% { transform: translateY(0px) rotateX(0deg); }
+      50% { transform: translateY(-8px) rotateX(5deg); }
+    }
+    
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+      transform: rotate(45deg);
+      transition: transform 0.6s;
+    }
+    
+    .feature-card:hover::before {
+      transform: rotate(45deg) translate(50%, 50%);
+    }
+    
+    .feature-card:hover {
+      border-color: #FFD700;
+      background: rgba(255, 140, 0, 0.25);
+      transform: translateY(-12px) scale(1.05);
+      box-shadow: 
+        0 15px 40px rgba(255, 140, 0, 0.3),
+        0 8px 20px rgba(0,0,0,0.2);
+    }
+    
+    .feature-card:nth-child(1) { animation-delay: -1s; }
+    .feature-card:nth-child(2) { animation-delay: -2s; }
+    .feature-card:nth-child(3) { animation-delay: -3s; }
+    .feature-card:nth-child(4) { animation-delay: -4s; }
+    
+    .feature-card h3 {
+      margin-top: 0;
+      color: #FFD700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      font-size: 1.3em;
+      margin-bottom: 15px;
+    }
+    
+    .feature-card p {
+      color: #FFA500;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    
+    /* Floating particles animation */
+    .main-menu::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #FFD700;
+      border-radius: 50%;
+      top: 20%;
+      left: 15%;
+      animation: particle1 12s linear infinite;
+      box-shadow: 
+        100px 200px 0 #FF8C00,
+        200px 100px 0 #FFA500,
+        300px 300px 0 #FFD700,
+        150px 50px 0 #FF6347,
+        50px 250px 0 #FFD700,
+        250px 200px 0 #FF8C00;
+    }
+    
+    @keyframes particle1 {
+      0% { 
+        transform: translateY(0px) translateX(0px) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { 
+        transform: translateY(-100vh) translateX(50px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Game Container Styles */
+    .game-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1200px;
+      overflow-y: auto; /* Make game container scrollable */
+      padding: 20px 0;
+      min-height: 100vh;
+    }
+    
+    .game-container.active {
+      display: flex;
+    }
+    
+    .back-to-menu {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(145deg, #2F1B14, #1a1a1a);
+      border: 2px solid #FF8C00;
+      padding: 10px 20px;
+      border-radius: 20px;
+      color: #FFD700;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .back-to-menu:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
+      background: linear-gradient(145deg, #1a1a1a, #2F1B14);
+    }
+    
+    /* Instructions Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      backdrop-filter: blur(5px);
+      overflow-y: auto; /* Make modal scrollable */
+      padding: 20px 0; /* Add padding for better mobile experience */
+    }
+    
+    .modal-content {
+      background: linear-gradient(145deg, #2F1B14, #1a1a1a);
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 20px;
+      width: 80%;
+      max-width: 600px;
+      max-height: 90vh; /* Limit height to viewport */
+      overflow-y: auto; /* Make modal content scrollable */
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      border: 2px solid #FF8C00;
+      position: relative;
+    }
+    
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      top: 15px;
+      right: 25px;
+    }
+    
+    .close:hover {
+      color: #FFD700;
+    }
+    
+    .instructions-content h2 {
+      color: #FFD700;
+      margin-top: 0;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    .instructions-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .instructions-list li {
+      margin: 15px 0;
+      padding: 10px;
+      background: rgba(255, 140, 0, 0.1);
+      border-radius: 8px;
+      border-left: 4px solid #FFD700;
+      color: #FFD700;
+    }
+    
+    /* Character Selection Styles */
+    .character-modal {
+      max-width: 900px;
+      width: 95%;
+      max-height: 95vh; /* Limit height for better mobile experience */
+      overflow-y: auto; /* Make character modal scrollable */
+    }
+    
+    .character-content h2 {
+      color: #FFD700;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .character-subtitle {
+      text-align: center;
+      color: #FFA500;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+    
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .character-card {
+      background: linear-gradient(145deg, #2F1B14, #1a1a1a);
+      border: 2px solid #FF8C00;
+      border-radius: 15px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .character-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3);
+    }
+    
+    .character-card.selected {
+      border-color: #FFD700;
+      background: linear-gradient(145deg, #3D2817, #2F1B14);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+    
+    .character-card.locked {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .character-card.locked:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .character-avatar {
+      font-size: 3em;
+      margin-bottom: 10px;
+      display: block;
+    }
+    
+    .character-name {
+      color: #FFD700;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .character-rarity {
+      font-size: 0.8em;
+      margin-bottom: 10px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    
+    .rarity-common {
+      background: #808080;
+      color: white;
+    }
+    
+    .rarity-uncommon {
+      background: #228B22;
+      color: white;
+    }
+    
+    .rarity-rare {
+      background: #4169E1;
+      color: white;
+    }
+    
+    .rarity-epic {
+      background: #8A2BE2;
+      color: white;
+    }
+    
+    .rarity-legendary {
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      color: #000;
+      font-weight: bold;
+    }
+    
+    .character-price {
+      color: #FFD700;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    
+    .character-ability {
+      font-size: 0.8em;
+      color: #FFA500;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    
+    .character-info {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 140, 0, 0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .character-info p {
+      margin: 10px 0;
+      color: #FFD700;
+    }
+    
+    .character-note {
+      font-size: 0.9em;
+      color: #FFA500;
+      font-style: italic;
+    }
+    
+    .currency-display {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 15px;
+    }
+    
+    .currency-display p {
+      margin: 5px 0;
+      padding: 10px 15px;
+      background: rgba(255, 140, 0, 0.2);
+      border-radius: 20px;
+      border: 1px solid #FFD700;
+    }
+    
+    .maze-token-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 10px;
+      border: 1px solid #FFD700;
+    }
+    
+    .maze-token-info h4 {
+      color: #FFD700;
+      margin: 0 0 10px 0;
+      text-align: center;
+    }
+    
+    .token-rewards {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .token-rewards li {
+      margin: 8px 0;
+      padding: 5px 10px;
+      background: rgba(255, 140, 0, 0.1);
+      border-radius: 5px;
+      border-left: 3px solid #FFD700;
+      font-size: 0.85em;
+      color: #FFA500;
+    }
+    
+    .purchase-btn {
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      border: 2px solid #FF8C00;
+      color: #000;
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 10px;
+    }
+    
+    .purchase-btn:hover {
+      background: linear-gradient(145deg, #FFA500, #FFD700);
+      transform: translateY(-1px);
+    }
+    
+    .purchase-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Profile Modal Styles */
+    .profile-content h2 {
+      color: #FFD700;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    
+    .stat-section {
+      background: rgba(255, 140, 0, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .stat-section h3 {
+      color: #FFD700;
+      margin: 0 0 15px 0;
+      text-align: center;
+      border-bottom: 1px solid #FFD700;
+      padding-bottom: 10px;
+    }
+    
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      padding: 8px 12px;
+      background: rgba(255, 140, 0, 0.1);
+      border-radius: 8px;
+      color: #FFD700;
+    }
+    
+    .stat-item span:last-child {
+      font-weight: bold;
+      color: #FFA500;
+    }
+    
+    .current-character {
+      text-align: center;
+    }
+    
+    .character-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      padding: 15px;
+      background: rgba(255, 140, 0, 0.2);
+      border-radius: 10px;
+      border: 1px solid #FFD700;
+    }
+    
+    .character-display span:first-child {
+      font-size: 2em;
+    }
+    
+    .character-display span:last-child {
+      color: #FFD700;
+      font-weight: bold;
+    }
+    
+    .character-unlocked {
+      color: #FFA500;
+      font-style: italic;
+    }
+    
+    /* Token Notification Styles */
+    .token-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+      animation: slideInRight 0.5s ease-out, fadeOut 0.5s ease-in 2.5s;
+    }
+    
+    .token-reward {
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      color: #000;
+      padding: 15px 20px;
+      border-radius: 15px;
+      border: 2px solid #FF8C00;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(255, 140, 0, 0.4);
+    }
+    
+    .token-reason {
+      font-size: 0.8em;
+      margin-top: 5px;
+      color: #8B4513;
+      font-style: italic;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+    
+    /* Existing game styles */
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      background: linear-gradient(45deg, #FFD700, #FF8C00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .game-info {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.1em;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    
+    .currency-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      justify-content: center;
+    }
+    
+    .currency-stats div {
+      padding: 5px 15px;
+      background: rgba(255, 140, 0, 0.2);
+      border-radius: 15px;
+      border: 1px solid #FFD700;
+    }
+    
+    canvas {
+      background: #1a1a1a;
+      display: block;
+      border: 4px solid #FFD700;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
+      margin-bottom: 20px;
+    }
+    
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .control-btn {
+      background: linear-gradient(145deg, #FF8C00, #FF6347);
+      border: 2px solid #FFD700;
+      border-radius: 15px;
+      color: #000000;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      transition: all 0.2s;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    
+    .control-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 140, 0, 0.4);
+      background: linear-gradient(145deg, #FFA500, #FF8C00);
+    }
+    
+    .control-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .control-btn:nth-child(2) { grid-column: 2; grid-row: 1; } /* Up */
+    .control-btn:nth-child(3) { grid-column: 1; grid-row: 2; } /* Left */
+    .control-btn:nth-child(4) { grid-column: 3; grid-row: 2; } /* Right */
+    .control-btn:nth-child(5) { grid-column: 2; grid-row: 3; } /* Down */
+    
+    .shoot-btn {
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      border: 2px solid #FF8C00;
+      grid-column: 3; 
+      grid-row: 1;
+      color: #000000;
+      font-weight: 900;
+    }
+    
+    .shoot-btn:hover {
+      background: linear-gradient(145deg, #FFA500, #FFD700);
+    }
+    
+    .instructions {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+    
+    .victory-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(255, 140, 0, 0.6);
+      border: 3px solid #FF8C00;
+      text-align: center;
+      z-index: 1000;
+      display: none;
+      color: #000000;
+      max-width: 90vw; /* Limit width */
+      max-height: 90vh; /* Limit height */
+      overflow-y: auto; /* Make scrollable */
+    }
+    
+    .victory-popup h2 {
+      margin-top: 0;
+      font-size: 2em;
+    }
+    
+    .restart-btn {
+      background: linear-gradient(145deg, #2F1B14, #1a1a1a);
+      border: 2px solid #FF8C00;
+      padding: 12px 24px;
+      border-radius: 25px;
+      color: #FFD700;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.2s;
+    }
+    
+    .restart-btn:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(145deg, #1a1a1a, #2F1B14);
+      box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .main-menu {
+        padding: 10px 0;
+        min-height: 100vh;
+      }
+      
+      .main-menu h1 {
+        font-size: 2.5em;
+      }
+      
+      .menu-btn {
+        padding: 12px 30px;
+        font-size: 16px;
+      }
+      
+      .game-features {
+        grid-template-columns: 1fr;
+      }
+      
+      .game-container {
+        padding: 10px 0;
+      }
+      
+      canvas {
+        width: 100%;
+        max-width: 360px;
+        height: auto;
+      }
+      
+      .controls {
+        grid-template-columns: repeat(3, 50px);
+        grid-template-rows: repeat(3, 50px);
+      }
+      
+      .control-btn {
+        font-size: 16px;
+      }
+      
+      .modal {
+        padding: 10px 0;
+      }
+      
+      .modal-content {
+        width: 95%;
+        margin: 10px auto;
+        padding: 20px;
+        max-height: 95vh;
+      }
+      
+      .character-modal {
+        width: 98%;
+        max-height: 98vh;
+      }
+      
+      .victory-popup, .game-over {
+        max-width: 95vw;
+        max-height: 95vh;
+        padding: 20px;
+      }
+    }
+    
+    .game-over {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(145deg, #2F1B14, #1a1a1a);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(255, 0, 0, 0.4);
+      border: 3px solid #FF0000;
+      text-align: center;
+      z-index: 1000;
+      color: #FFD700;
+      max-width: 90vw; /* Limit width */
+      max-height: 90vh; /* Limit height */
+      overflow-y: auto; /* Make scrollable */
+    }
+    
+    .game-over h2 {
+      color: #FF0000;
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    
+    .game-over p {
+      margin: 10px 0;
+      font-size: 1.2em;
+    }
+    
+    .game-over .restart-btn {
+      margin-top: 20px;
+      background: linear-gradient(145deg, #FF8C00, #FF6347);
+      border: 2px solid #FFD700;
+      padding: 12px 24px;
+      border-radius: 25px;
+      color: #000000;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .game-over .restart-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 140, 0, 0.4);
+    }
+    
+    /* Weapon Selection Styles */
+    .weapon-content h2 {
+      color: #FFD700;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .weapon-subtitle {
+      text-align: center;
+      color: #FFA500;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+    
+    .weapon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .weapon-stats {
+      font-size: 0.8em;
+      color: #FFA500;
+      margin-top: 5px;
+      text-align: center;
+    }
+    
+    .weapon-info {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 140, 0, 0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .weapon-note {
+      font-size: 0.9em;
+      color: #FFA500;
+      font-style: italic;
+    }
+    
+    .weapon-abilities-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 10px;
+      border: 1px solid #FFD700;
+    }
+    
+    .weapon-abilities-info h4 {
+      color: #FFD700;
+      margin: 0 0 10px 0;
+      text-align: center;
+    }
+    
+    .ability-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .ability-list li {
+      margin: 8px 0;
+      padding: 5px 10px;
+      background: rgba(255, 140, 0, 0.1);
+      border-radius: 5px;
+      border-left: 3px solid #FFD700;
+      font-size: 0.85em;
+      color: #FFA500;
+      text-align: left;
+    }
+    
+    .character-sprite {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #FFD700;
+      margin-bottom: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      transition: all 0.3s;
+    }
+    
+    .character-sprite:hover {
+      transform: scale(1.05);
+      border-color: #FFA500;
+      box-shadow: 0 4px 8px rgba(255, 215, 0, 0.4);
+    }
+    
+    .character-card.selected .character-sprite {
+      border-color: #FFD700;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    }
+    
+    /* Floating particles animation */
+    .main-menu::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #FFD700;
+      border-radius: 50%;
+      top: 20%;
+      left: 15%;
+      animation: particle1 12s linear infinite;
+      box-shadow: 
+        100px 200px 0 #FF8C00,
+        200px 100px 0 #FFA500,
+        300px 300px 0 #FFD700,
+        150px 50px 0 #FF6347,
+        50px 250px 0 #FFD700,
+        250px 200px 0 #FF8C00;
+    }
+    
+    @keyframes particle1 {
+      0% { 
+        transform: translateY(0px) translateX(0px) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { 
+        transform: translateY(-100vh) translateX(50px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Hero sprites decoration */
+    .hero-sprites {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .sprite-container {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+    }
+    
+    .sprite-left {
+      top: 20%;
+      left: 5%;
+      animation: floatLeft 8s ease-in-out infinite;
+    }
+    
+    .sprite-right {
+      top: 25%;
+      right: 5%;
+      animation: floatRight 8s ease-in-out infinite -4s;
+    }
+    
+    @keyframes floatLeft {
+      0%, 100% { 
+        transform: translateY(0px) translateX(0px) rotateY(0deg);
+        opacity: 0.6;
+      }
+      50% { 
+        transform: translateY(-20px) translateX(10px) rotateY(5deg);
+        opacity: 0.9;
+      }
+    }
+    
+    @keyframes floatRight {
+      0%, 100% { 
+        transform: translateY(0px) translateX(0px) rotateY(0deg);
+        opacity: 0.7;
+      }
+      50% { 
+        transform: translateY(-15px) translateX(-10px) rotateY(-5deg);
+        opacity: 1;
+      }
+    }
+    
+    .menu-sprite {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 15px rgba(255, 140, 0, 0.5));
+      transition: all 0.3s ease;
+    }
+    
+    .floating-sprite-1 {
+      animation: spriteGlow1 4s ease-in-out infinite;
+    }
+    
+    .floating-sprite-2 {
+      animation: spriteGlow2 4s ease-in-out infinite -2s;
+    }
+    
+    @keyframes spriteGlow1 {
+      0%, 100% { 
+        filter: drop-shadow(0 0 15px rgba(255, 140, 0, 0.5));
+      }
+      50% { 
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8));
+      }
+    }
+    
+    @keyframes spriteGlow2 {
+      0%, 100% { 
+        filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.5));
+      }
+      50% { 
+        filter: drop-shadow(0 0 25px rgba(75, 0, 130, 0.8));
+      }
+    }
+    
+    /* Title container enhancement */
+    .title-container {
+      position: relative;
+      z-index: 10;
+      margin-bottom: 30px;
+    }
+    
+    /* Enhanced button styles */
+    .btn-icon {
+      font-size: 1.2em;
+      margin-right: 10px;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+    
+    .btn-text {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .btn-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.6s ease;
+      z-index: 1;
+    }
+    
+    .menu-btn:hover .btn-icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+    
+    .menu-btn:hover .btn-glow {
+      width: 100px;
+      height: 100px;
+    }
+    
+    /* Feature card icons */
+    .feature-icon {
+      font-size: 3em;
+      margin-bottom: 15px;
+      display: block;
+      animation: iconFloat 6s ease-in-out infinite;
+      text-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
+    }
+    
+    @keyframes iconFloat {
+      0%, 100% { 
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% { 
+        transform: translateY(-10px) rotate(5deg);
+      }
+    }
+    
+    .feature-card:nth-child(1) .feature-icon { animation-delay: -1s; }
+    .feature-card:nth-child(2) .feature-icon { animation-delay: -2s; }
+    .feature-card:nth-child(3) .feature-icon { animation-delay: -3s; }
+    .feature-card:nth-child(4) .feature-icon { animation-delay: -4s; }
+    
+    /* Treasure icons decoration */
+    .treasure-icons {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .treasure-icon {
+      position: absolute;
+      font-size: 2em;
+      animation: treasureFloat 10s linear infinite;
+      opacity: 0.7;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+    
+    .treasure-1 {
+      top: 15%;
+      right: 20%;
+      animation-delay: 0s;
+    }
+    
+    .treasure-2 {
+      top: 60%;
+      left: 10%;
+      animation-delay: -2.5s;
+    }
+    
+    .treasure-3 {
+      top: 40%;
+      right: 8%;
+      animation-delay: -5s;
+    }
+    
+    .treasure-4 {
+      top: 70%;
+      right: 25%;
+      animation-delay: -7.5s;
+    }
+    
+    @keyframes treasureFloat {
+      0% {
+        transform: translateY(0px) translateX(0px) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 0.7; }
+      90% { opacity: 0.7; }
+      100% {
+        transform: translateY(-30px) translateX(15px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Mobile responsiveness for new elements */
+    @media (max-width: 768px) {
+      .hero-sprites {
+        display: none; /* Hide sprites on mobile for better performance */
+      }
+      
+      .treasure-icons {
+        display: none; /* Hide decorative elements on mobile */
+      }
+      
+      .btn-icon {
+        font-size: 1em;
+        margin-right: 8px;
+      }
+      
+      .feature-icon {
+        font-size: 2.5em;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .menu-btn {
+        min-width: 250px;
+        padding: 16px 40px;
+        font-size: 16px;
+      }
+      
+      .menu-btn.start-btn {
+        font-size: 18px;
+        padding: 18px 45px;
+      }
+    }
+    
+    /* Sound Settings Modal Styles */
+    .sound-content h2 {
+      color: #FFD700;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .sound-subtitle {
+      text-align: center;
+      color: #FFA500;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+    
+    .sound-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    
+    .volume-section {
+      background: rgba(255, 140, 0, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .volume-section h3 {
+      color: #FFD700;
+      margin: 0 0 15px 0;
+      text-align: center;
+      border-bottom: 1px solid #FFD700;
+      padding-bottom: 10px;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .toggle-btn {
+      background: linear-gradient(145deg, #27ae60, #219a52);
+      border: 2px solid #FFD700;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 16px;
+      align-self: flex-start;
+    }
+    
+    .toggle-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(39, 174, 96, 0.4);
+    }
+    
+    .toggle-btn.disabled {
+      background: linear-gradient(145deg, #e74c3c, #c0392b);
+      box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+    }
+    
+    .toggle-btn.disabled:hover {
+      box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
+    }
+    
+    .volume-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .volume-slider-container label {
+      color: #FFD700;
+      font-weight: bold;
+      min-width: 80px;
+    }
+    
+    .volume-slider-container input[type="range"] {
+      flex: 1;
+      min-width: 150px;
+      height: 8px;
+      border-radius: 5px;
+      background: #2F1B14;
+      outline: none;
+      border: 1px solid #FFD700;
+    }
+    
+    .volume-slider-container input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      cursor: pointer;
+      border: 2px solid #FF8C00;
+    }
+    
+    .volume-slider-container input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      cursor: pointer;
+      border: 2px solid #FF8C00;
+    }
+    
+    .volume-slider-container span {
+      color: #FFA500;
+      font-weight: bold;
+      min-width: 40px;
+      text-align: right;
+    }
+    
+    .sound-info {
+      background: rgba(255, 140, 0, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .sound-tips h4 {
+      color: #FFD700;
+      margin: 0 0 15px 0;
+      text-align: center;
+    }
+    
+    .tips-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .tips-list li {
+      margin: 10px 0;
+      padding: 8px 12px;
+      background: rgba(255, 140, 0, 0.1);
+      border-radius: 8px;
+      border-left: 3px solid #FFD700;
+      color: #FFA500;
+      font-size: 0.9em;
+    }
+    
+    @media (max-width: 768px) {
+      .volume-slider-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      
+      .volume-slider-container label {
+        min-width: auto;
+      }
+      
+      .volume-slider-container span {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Main Menu -->
+<div class="main-menu" id="mainMenu">
+  <!-- Character sprite decorations -->
+  <div class="hero-sprites">
+    <div class="sprite-container sprite-left">
+      <img src="hero/PNG/Wraith_01/PNG Sequences/Idle/Wraith_01_Idle_000.png" alt="Shadow Wraith" class="menu-sprite floating-sprite-1">
+    </div>
+    <div class="sprite-container sprite-right">
+      <img src="hero/PNG/Wraith_03/PNG Sequences/Idle/Wraith_03_Idle_000.png" alt="Void Wraith" class="menu-sprite floating-sprite-2">
+    </div>
+  </div>
+  
+  <div class="title-container">
+    <h1>🏴‍☠️ Treasure Maze Adventure</h1>
+    <p class="subtitle">Navigate through dangerous mazes and find the treasure!</p>
+  </div>
+  
+  <div class="menu-buttons">
+    <button class="menu-btn start-btn" id="startGameBtn">
+      <span class="btn-icon">🎮</span>
+      <span class="btn-text">Start Adventure</span>
+      <div class="btn-glow"></div>
+    </button>
+    <button class="menu-btn character-btn" id="characterSelectBtn">
+      <span class="btn-icon">👤</span>
+      <span class="btn-text">Select Character</span>
+      <div class="btn-glow"></div>
+    </button>
+    <button class="menu-btn weapon-btn" id="weaponSelectBtn">
+      <span class="btn-icon">⚔️</span>
+      <span class="btn-text">Weapon Arsenal</span>
+      <div class="btn-glow"></div>
+    </button>
+    <button class="menu-btn profile-btn" id="profileBtn">
+      <span class="btn-icon">📊</span>
+      <span class="btn-text">Player Profile</span>
+      <div class="btn-glow"></div>
+    </button>
+    <button class="menu-btn share-btn" id="shareBtn">
+      <span class="btn-icon">📤</span>
+      <span class="btn-text">Share My Progress</span>
+      <div class="btn-glow"></div>
+    </button>
+    <button class="menu-btn sound-btn" id="soundBtn">
+      <span class="btn-icon">🔊</span>
+      <span class="btn-text">Sound Settings</span>
+      <div class="btn-glow"></div>
+    </button>
+    <button class="menu-btn instructions-btn" id="instructionsBtn">
+      <span class="btn-icon">📖</span>
+      <span class="btn-text">How to Play</span>
+      <div class="btn-glow"></div>
+    </button>
+    <button class="menu-btn credits-btn" id="creditsBtn">
+      <span class="btn-icon">👨‍💻</span>
+      <span class="btn-text">Credits</span>
+      <div class="btn-glow"></div>
+    </button>
+  </div>
+  
+  <div class="game-features">
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>Multiple Levels</h3>
+      <p>Challenge yourself through increasingly difficult mazes</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👹</div>
+      <h3>Smart Enemies</h3>
+      <p>AI enemies that patrol and chase you when detected</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔫</div>
+      <h3>Combat System</h3>
+      <p>Shoot projectiles to defeat enemies in your path</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <h3>Touch Controls</h3>
+      <p>Play on any device with responsive controls</p>
+    </div>
+  </div>
+  
+  <!-- Decorative elements -->
+  <div class="treasure-icons">
+    <div class="treasure-icon treasure-1">💎</div>
+    <div class="treasure-icon treasure-2">🏆</div>
+    <div class="treasure-icon treasure-3">⭐</div>
+    <div class="treasure-icon treasure-4">🧩</div>
+  </div>
+</div>
+
+<!-- Game Container -->
+<div class="game-container" id="gameContainer">
+  <button class="back-to-menu" id="backToMenuBtn">← Main Menu</button>
+
+<h1>🏴‍☠️ Treasure Maze Adventure</h1>
+<div class="game-info">
+      <div class="stats">
+      <div>🚶 Steps: <span id="stepCount">0</span></div>
+      <div>⏱️ Time: <span id="timeCount">0</span>s</div>
+      <div>💎 Level: <span id="levelCount">1</span></div>
+      <div>🔫 Ammo: <span id="ammoCount">10</span></div>
+      <div>❤️ Lives: <span id="livesCount">3</span></div>
+      <div>💀 Kills: <span id="killCount">0</span></div>
+    </div>
+        <div class="currency-stats">
+      <div>🧩 MAZE: <span id="gameMazeTokens">0</span></div>
+      <div id="currentWeaponDisplay" style="cursor: pointer; background: linear-gradient(145deg, #8B0000, #DC143C); border-color: #FFD700; padding: 5px 15px; border-radius: 15px; border: 1px solid #FFD700; color: #FFD700;" onclick="showWeaponSelect()" title="Click to change weapon">⚔️ <span id="currentWeaponName">Basic Weapon</span></div>
+    </div>
+  <p>Navigate through the maze, avoid or shoot enemies, and find the treasure chest!</p>
+</div>
+
+  <canvas id="mazeCanvas" width="720" height="510"></canvas>
+
+<div class="controls">
+  <button class="control-btn shoot-btn" onclick="shoot()">🔫</button>
+  <button class="control-btn" onclick="movePlayer(0, -1)">↑</button>
+  <button class="control-btn" onclick="movePlayer(-1, 0)">←</button>
+  <button class="control-btn" onclick="movePlayer(1, 0)">→</button>
+  <button class="control-btn" onclick="movePlayer(0, 1)">↓</button>
+</div>
+
+<div class="instructions">
+  Use arrow keys or touch controls to move • Spacebar or 🔫 to shoot • Kill enemies for rewards • Find the treasure to advance!
+  </div>
+</div>
+
+<!-- Instructions Modal -->
+<div id="instructionsModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="instructions-content">
+      <h2>📖 How to Play</h2>
+      <ul class="instructions-list">
+        <li><strong>🎯 Objective:</strong> Navigate through the maze and find the golden treasure chest to advance to the next level.</li>
+        <li><strong>🚶 Movement:</strong> Use arrow keys on keyboard or touch controls on mobile to move your character.</li>
+        <li><strong>👹 Enemies:</strong> Red enemies patrol the maze. They will chase you if you get too close (within 5 tiles).</li>
+        <li><strong>🔫 Combat:</strong> Press spacebar or tap the gun button to shoot projectiles in all directions. Each enemy takes 3 hits to defeat.</li>
+        <li><strong>💰 Combat Rewards:</strong> Killing enemies grants MAZE tokens, ammo refills, and health restoration! Different enemy types give different rewards.</li>
+        <li><strong>🏆 Bonus Objectives:</strong> Defeat all enemies in a level for the "Enemy Exterminator" bonus (+5 MAZE tokens)!</li>
+        <li><strong>💎 Levels:</strong> Complete mazes to unlock new levels with increased difficulty.</li>
+        <li><strong>📊 Stats:</strong> Track your steps, time, and enemies defeated for each level.</li>
+        <li><strong>⚠️ Game Over:</strong> If an enemy touches you, you lose a life. Lose all lives and the game ends.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Credits Modal -->
+<div id="creditsModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="instructions-content">
+      <h2>👨‍💻 Credits</h2>
+      <p><strong>Game Design & Development:</strong> Enhanced Maze Adventure</p>
+      <p><strong>Features:</strong></p>
+      <ul class="instructions-list">
+        <li>Intelligent enemy AI with pathfinding</li>
+        <li>Particle effects and animations</li>
+        <li>Progressive difficulty system</li>
+        <li>Responsive design for all devices</li>
+        <li>Touch and keyboard controls</li>
+      </ul>
+      <p><strong>Built with:</strong> HTML5 Canvas, JavaScript, CSS3</p>
+    </div>
+  </div>
+</div>
+
+<!-- Character Selection Modal -->
+<div id="characterModal" class="modal">
+  <div class="modal-content character-modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="character-content">
+      <h2>👤 Select Your Character</h2>
+      <p class="character-subtitle">Choose your adventurer! Higher rarity characters have special abilities.</p>
+      <div class="character-grid" id="characterGrid">
+        <!-- Characters will be populated by JavaScript -->
+      </div>
+      <div class="character-info">
+        <div class="currency-display">
+          <p><strong>🧩 MAZE Tokens:</strong> <span id="playerMazeTokens">0</span></p>
+        </div>
+        <p class="character-note">Complete levels to earn coins and MAZE tokens!</p>
+        <div class="maze-token-info">
+          <h4>🧩 MAZE Token Rewards:</h4>
+          <ul class="token-rewards">
+            <li>🏆 Complete Level: +3 MAZE</li>
+            <li>⚡ Speed Bonus: +2 MAZE (under 20s)</li>
+            <li>🎯 Perfect Run: +3 MAZE (no damage)</li>
+            <li>💀 Enemy Exterminator: +5 MAZE (defeat all enemies)</li>
+            <li>🔥 Streak Bonus: +5 MAZE (5+ levels in a row)</li>
+            <li>⚔️ Combat Kills: +1-5 MAZE per enemy (varies by type)</li>
+            <li>🔫 Ammo Drops: Enemies drop ammo when defeated</li>
+            <li>❤️ Health Drops: Some enemies restore health when killed</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Player Profile Modal -->
+<div id="profileModal" class="modal">
+  <div class="modal-content character-modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="profile-content">
+      <h2>📊 Player Profile</h2>
+      <div class="profile-stats">
+        <div class="stat-section">
+          <h3>💰 Wallet</h3>
+          <div class="stat-item">
+            <span>🧩 MAZE Tokens:</span>
+            <span id="profileMazeTokens">0</span>
+          </div>
+          <div class="stat-item">
+            <span>🎯 Current Level:</span>
+            <span id="profileCurrentLevel">1</span>
+          </div>
+        </div>
+        
+        <div class="stat-section">
+          <h3>🏆 Achievements</h3>
+          <div class="stat-item">
+            <span>📈 Levels Completed:</span>
+            <span id="profileLevels">0</span>
+          </div>
+          <div class="stat-item">
+            <span>⚡ Best Time:</span>
+            <span id="profileBestTime">--</span>
+          </div>
+          <div class="stat-item">
+            <span>💀 Enemies Defeated:</span>
+            <span id="profileEnemies">0</span>
+          </div>
+          <div class="stat-item">
+            <span>🏆 Total Sessions:</span>
+            <span id="profileSessions">0</span>
+          </div>
+        </div>
+        
+        <div class="stat-section">
+          <h3>👤 Character & Equipment</h3>
+          <div class="current-character">
+            <div class="character-display">
+              <span id="profileCharacterAvatar">🧑‍🦲</span>
+              <span id="profileCharacterName">Rookie Explorer</span>
+            </div>
+            <div class="character-unlocked">
+              <span>Unlocked Characters: <span id="profileUnlockedCount">1</span>/5</span>
+            </div>
+            <div class="character-unlocked">
+              <span>Unlocked Weapons: <span id="profileUnlockedWeapons">1</span>/4</span>
+          </div>
+            <div class="character-display" style="margin-top: 10px;">
+              <span id="profileWeaponIcon">🔫</span>
+              <span id="profileWeaponName">Basic Weapon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Weapon Selection Modal -->
+<div id="weaponModal" class="modal">
+  <div class="modal-content character-modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="weapon-content">
+      <h2>⚔️ Weapon Arsenal</h2>
+      <p class="weapon-subtitle">Choose your weapon! Different weapons have unique abilities and firing patterns.</p>
+      <div class="weapon-grid" id="weaponGrid">
+        <!-- Weapons will be populated by JavaScript -->
+      </div>
+      <div class="weapon-info">
+        <div class="currency-display">
+          <p><strong>🧩 MAZE Tokens:</strong> <span id="weaponMazeTokens">0</span></p>
+        </div>
+        <p class="weapon-note">Complete levels to earn MAZE tokens for weapon upgrades!</p>
+        <div class="weapon-abilities-info">
+          <h4>⚔️ Weapon Abilities:</h4>
+          <ul class="ability-list">
+            <li>🔫 <strong>Basic:</strong> Standard 4-directional shooting</li>
+            <li>✨ <strong>Legendary:</strong> 8-directional golden projectiles</li>
+            <li>🔮 <strong>Mage:</strong> Piercing magical projectiles</li>
+            <li>🌟 <strong>Sage:</strong> 12-directional homing projectiles</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sound Settings Modal -->
+<div id="soundModal" class="modal">
+  <div class="modal-content character-modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <div class="sound-content">
+      <h2>🔊 Sound Settings</h2>
+      <p class="sound-subtitle">Adjust your audio experience for the perfect adventure!</p>
+      
+      <div class="sound-controls">
+        <div class="volume-section">
+          <h3>🎵 Background Music</h3>
+          <div class="control-group">
+            <button class="toggle-btn" id="musicToggle" onclick="toggleMusicSetting()">
+              <span id="musicToggleIcon">🔊</span> <span id="musicToggleText">ON</span>
+            </button>
+            <div class="volume-slider-container">
+              <label>Volume:</label>
+              <input type="range" id="musicVolumeSlider" min="0" max="100" value="40" oninput="updateMusicVolume(this.value)">
+              <span id="musicVolumeDisplay">40%</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="volume-section">
+          <h3>🔫 Sound Effects</h3>
+          <div class="control-group">
+            <button class="toggle-btn" id="sfxToggle" onclick="toggleSFXSetting()">
+              <span id="sfxToggleIcon">🔊</span> <span id="sfxToggleText">ON</span>
+            </button>
+            <div class="volume-slider-container">
+              <label>Volume:</label>
+              <input type="range" id="sfxVolumeSlider" min="0" max="100" value="80" oninput="updateSFXVolume(this.value)">
+              <span id="sfxVolumeDisplay">80%</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="volume-section">
+          <h3>🎚️ Master Volume</h3>
+          <div class="control-group">
+            <div class="volume-slider-container">
+              <label>Overall Volume:</label>
+              <input type="range" id="masterVolumeSlider" min="0" max="100" value="70" oninput="updateMasterVolume(this.value)">
+              <span id="masterVolumeDisplay">70%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sound-info">
+        <div class="sound-tips">
+          <h4>🎮 Audio Tips:</h4>
+          <ul class="tips-list">
+            <li>🎵 Background music creates an immersive arcade atmosphere</li>
+            <li>🔊 Sound effects provide important gameplay feedback</li>
+            <li>🎚️ Adjust master volume to your comfort level</li>
+            <li>💾 Settings are automatically saved locally</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="victory-popup" id="victoryPopup">
+  <h2>🎉 Treasure Found!</h2>
+  <p>You completed the maze!</p>
+  <p><strong>Steps:</strong> <span id="finalSteps"></span> | <strong>Time:</strong> <span id="finalTime"></span>s | <strong>Enemies Defeated:</strong> <span id="finalEnemies"></span></p>
+  <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
+    <button class="restart-btn" onclick="nextLevelNew()">Next Level →</button>
+    <button class="restart-btn" onclick="showShareScore()" style="background: linear-gradient(145deg, #27ae60, #219a52);">📤 Share Score</button>
+  </div>
+</div>
+
+<script type="module">
+import { WeaponSystem, weaponCategories } from './weapon.js';
+import { generateEnemies, positionEnemies, drawEnemy, ENEMY_TYPES, updateEnemySprite, loadSpritesFromDirectory, loadAnimatedSprites, setEnemySpriteVariation, preloadAllSprites, reloadEnemySprites, enemySprites } from './enemies.js';
+
+// Preload all sprites when the page loads
+console.log('🎮 Loading Treasure Maze Adventure...');
+preloadAllSprites().then((success) => {
+  if (success) {
+    console.log('✅ All enemy sprites loaded successfully!');
+  } else {
+    console.log('⚠️ Some sprites failed to load, but game will continue with available sprites.');
+  }
+});
+
+// Load the enhanced animated sprites from sp2 and sp3 folders
+loadAnimatedSprites();
+
+// You can also set specific sprite variations for different enemy states:
+// setEnemySpriteVariation('ninja', 'owlet_run');
+// setEnemySpriteVariation('berserker_melee', 'dude_attack2');
+
+// Debug: You can reload sprites if needed during development:
+// reloadEnemySprites();
+
+// Character System
+const characters = [
+  {
+    id: 'rookie',
+    name: 'Hero',
+    avatar: '🦸‍♂️', // Changed from archer emoji to hero emoji
+    sprite: 'sp3/Dude_Monster.png', // Changed to use proper sprite sheet format
+    walkSprite: 'sp3/Dude_Monster_Walk_6.png', // 6-frame walking sprite sheet
+    attackSprite: 'sp3/Dude_Monster_Attack1_4.png', // 4-frame attack sprite sheet
+    hurtSprite: 'sp3/Dude_Monster_Hurt_4.png', // 4-frame hurt sprite sheet
+    rarity: 'common',
+    price: 0,
+    ability: 'Standard movement + Hero abilities',
+    speedBonus: 0,
+    ammoBonus: 0,
+    healthBonus: 0
+  },
+  {
+    id: 'wraith_01',
+    name: 'Shadow Wraith',
+    avatar: '👻',
+    sprite: 'hero/PNG/Wraith_01/PNG Sequences/Idle/Wraith_01_Idle_000.png',
+    walkSprite: 'hero/PNG/Wraith_01/PNG Sequences/Walking/Wraith_01_Walking_000.png',
+    attackSprite: 'hero/PNG/Wraith_01/PNG Sequences/Attacking/Wraith_01_Attacking_000.png',
+    hurtSprite: 'hero/PNG/Wraith_01/PNG Sequences/Hurt/Wraith_01_Hurt_000.png',
+    rarity: 'uncommon',
+    price: 20,
+    ability: 'Phase through enemies +1 Speed',
+    speedBonus: 1,
+    ammoBonus: 0,
+    healthBonus: 0
+  },
+  {
+    id: 'wraith_02',
+    name: 'Mystic Wraith',
+    avatar: '🔮',
+    sprite: 'hero/PNG/Wraith_02/PNG Sequences/Idle/Wraith_02_Idle_000.png',
+    walkSprite: 'hero/PNG/Wraith_02/PNG Sequences/Walking/Wraith_02_Walking_000.png',
+    attackSprite: 'hero/PNG/Wraith_02/PNG Sequences/Attacking/Wraith_02_Attacking_000.png',
+    hurtSprite: 'hero/PNG/Wraith_02/PNG Sequences/Hurt/Wraith_02_Hurt_000.png',
+    castSprite: 'hero/PNG/Wraith_02/PNG Sequences/Casting Spells/Wraith_02_Casting_Spells_000.png',
+    rarity: 'rare',
+    price: 40,
+    ability: 'Spell casting +3 Ammo +Magic resistance',
+    speedBonus: 0,
+    ammoBonus: 3,
+    healthBonus: 1
+  },
+  {
+    id: 'wraith_03',
+    name: 'Void Wraith',
+    avatar: '⚫',
+    sprite: 'hero/PNG/Wraith_03/PNG Sequences/Idle/Wraith_03_Idle_000.png',
+    walkSprite: 'hero/PNG/Wraith_03/PNG Sequences/Walking/Wraith_03_Walking_000.png',
+    attackSprite: 'hero/PNG/Wraith_03/PNG Sequences/Attacking/Wraith_03_Attacking_000.png',
+    hurtSprite: 'hero/PNG/Wraith_03/PNG Sequences/Hurt/Wraith_03_Hurt_000.png',
+    castSprite: 'hero/PNG/Wraith_03/PNG Sequences/Casting Spells/Wraith_03_Casting_Spells_000.png',
+    rarity: 'epic',
+    price: 75,
+    ability: 'Void powers +2 Speed +5 Ammo +1 Health',
+    speedBonus: 2,
+    ammoBonus: 5,
+    healthBonus: 1
+  },
+  {
+    id: 'legend',
+    name: 'Legendary Hero',
+    avatar: '👑',
+    rarity: 'legendary',
+    price: 100,
+    ability: 'All Bonuses +Double Rewards',
+    speedBonus: 1,
+    ammoBonus: 3,
+    healthBonus: 1
+  }
+];
+
+// Game state
+const gameState = {
+  canvas: document.getElementById("mazeCanvas"),
+  ctx: null,
+  tileSize: 30,
+  currentLevel: 1,
+  MAX_LEVELS: 50,
+  steps: 0,
+  startTime: Date.now(),
+  gameRunning: false,
+  enemiesDefeated: 0,
+  playerLives: 3,
+  ENEMY_MOVE_INTERVAL: 500,
+  lastEnemyMoveTime: Date.now(),
+  maze: [],
+  enemies: [],
+  player: { x: 1, y: 1 },
+  particles: [],
+  weaponSystem: new WeaponSystem()
+};
+
+// Initialize context
+gameState.ctx = gameState.canvas.getContext("2d");
+
+// Add event listeners for menu buttons
+document.addEventListener('DOMContentLoaded', () => {
+  // Menu buttons
+  document.getElementById('startGameBtn').addEventListener('click', startGame);
+  document.getElementById('characterSelectBtn').addEventListener('click', showCharacterSelect);
+  document.getElementById('weaponSelectBtn').addEventListener('click', showWeaponSelect);
+  document.getElementById('profileBtn').addEventListener('click', showProfile);
+  document.getElementById('shareBtn').addEventListener('click', showShareScore);
+  document.getElementById('soundBtn').addEventListener('click', showSoundSettings);
+  document.getElementById('instructionsBtn').addEventListener('click', showInstructions);
+  document.getElementById('creditsBtn').addEventListener('click', showCredits);
+  document.getElementById('backToMenuBtn').addEventListener('click', backToMenu);
+  
+  // Add hover sound effects to all menu buttons
+  const menuButtons = document.querySelectorAll('.menu-btn, .restart-btn, .purchase-btn, .control-btn');
+  menuButtons.forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      playHoverSound();
+    });
+    btn.addEventListener('click', () => {
+      playButtonSound();
+      
+      // Try to start background music on any button click
+      setTimeout(() => {
+        if (window.startBackgroundMusic && window.getSoundSettings) {
+          const settings = getSoundSettings();
+          if (settings.musicEnabled && (!window.backgroundMusic || window.backgroundMusic.length === 0)) {
+            console.log('🎵 Starting music from button click...');
+            startBackgroundMusic();
+          }
+        }
+      }, 50);
+    });
+  });
+  
+  // Initialize game and update displays
+  loadPlayerData();
+  updateCurrencyDisplay();
+  updateProfileDisplay();
+});
+
+// Game functions
+function startGame() {
+  document.getElementById('mainMenu').style.display = 'none';
+  document.getElementById('gameContainer').classList.add('active');
+  updateCurrencyDisplay();
+  updateProfileDisplay();
+  
+  // Ensure background music is playing during game
+  setTimeout(() => {
+    if (window.startBackgroundMusic && window.getSoundSettings) {
+      const settings = getSoundSettings();
+      if (settings.musicEnabled && (!window.backgroundMusic || window.backgroundMusic.length === 0)) {
+        console.log('🎵 Starting music for game...');
+        startBackgroundMusic();
+      }
+    }
+  }, 100);
+  
+  initializeGameNew();
+}
+
+function backToMenu() {
+  document.getElementById('gameContainer').classList.remove('active');
+  document.getElementById('mainMenu').style.display = 'flex';
+  gameState.gameRunning = false;
+  
+  // Ensure background music continues in main menu
+  setTimeout(() => {
+    if (window.startBackgroundMusic && window.getSoundSettings) {
+      const settings = getSoundSettings();
+      if (settings.musicEnabled && (!window.backgroundMusic || window.backgroundMusic.length === 0)) {
+        console.log('🎵 Ensuring music plays in main menu...');
+        startBackgroundMusic();
+      }
+    }
+  }, 100);
+}
+
+function showInstructions() {
+  document.getElementById('instructionsModal').style.display = 'block';
+}
+
+function showCredits() {
+  document.getElementById('creditsModal').style.display = 'block';
+}
+
+function showCharacterSelect() {
+  // Ensure latest data is shown
+  loadPlayerData();
+  document.getElementById('characterModal').style.display = 'block';
+  renderCharacterGrid();
+  updateCurrencyDisplay();
+}
+
+function showProfile() {
+  // Force a fresh update of all data before showing profile
+  loadPlayerData();
+  document.getElementById('profileModal').style.display = 'block';
+  updateProfileDisplay();
+}
+
+function showWeaponSelect() {
+  // Ensure latest data is shown
+  syncAllPlayerData();
+  document.getElementById('weaponModal').style.display = 'block';
+  renderWeaponGrid();
+  updateWeaponCurrencyDisplay();
+}
+
+function showSoundSettings() {
+  document.getElementById('soundModal').style.display = 'block';
+  initializeSoundSettings();
+}
+
+function initializeSoundSettings() {
+  const settings = getSoundSettings();
+  
+  // Update music toggle
+  const musicToggle = document.getElementById('musicToggle');
+  const musicIcon = document.getElementById('musicToggleIcon');
+  const musicText = document.getElementById('musicToggleText');
+  
+  if (settings.musicEnabled) {
+    musicToggle.classList.remove('disabled');
+    musicIcon.textContent = '🔊';
+    musicText.textContent = 'ON';
+  } else {
+    musicToggle.classList.add('disabled');
+    musicIcon.textContent = '🔇';
+    musicText.textContent = 'OFF';
+  }
+  
+  // Update SFX toggle
+  const sfxToggle = document.getElementById('sfxToggle');
+  const sfxIcon = document.getElementById('sfxToggleIcon');
+  const sfxText = document.getElementById('sfxToggleText');
+  
+  if (settings.sfxEnabled) {
+    sfxToggle.classList.remove('disabled');
+    sfxIcon.textContent = '🔊';
+    sfxText.textContent = 'ON';
+  } else {
+    sfxToggle.classList.add('disabled');
+    sfxIcon.textContent = '🔇';
+    sfxText.textContent = 'OFF';
+  }
+  
+  // Update volume sliders
+  document.getElementById('masterVolumeSlider').value = Math.round(settings.masterVolume * 100);
+  document.getElementById('masterVolumeDisplay').textContent = Math.round(settings.masterVolume * 100) + '%';
+  
+  document.getElementById('musicVolumeSlider').value = Math.round(settings.musicVolume * 100);
+  document.getElementById('musicVolumeDisplay').textContent = Math.round(settings.musicVolume * 100) + '%';
+  
+  document.getElementById('sfxVolumeSlider').value = Math.round(settings.sfxVolume * 100);
+  document.getElementById('sfxVolumeDisplay').textContent = Math.round(settings.sfxVolume * 100) + '%';
+}
+
+function toggleMusicSetting() {
+  const enabled = toggleMusic();
+  const musicToggle = document.getElementById('musicToggle');
+  const musicIcon = document.getElementById('musicToggleIcon');
+  const musicText = document.getElementById('musicToggleText');
+  
+  if (enabled) {
+    musicToggle.classList.remove('disabled');
+    musicIcon.textContent = '🔊';
+    musicText.textContent = 'ON';
+  } else {
+    musicToggle.classList.add('disabled');
+    musicIcon.textContent = '🔇';
+    musicText.textContent = 'OFF';
+  }
+  
+  playButtonSound();
+}
+
+function toggleSFXSetting() {
+  const enabled = toggleSFX();
+  const sfxToggle = document.getElementById('sfxToggle');
+  const sfxIcon = document.getElementById('sfxToggleIcon');
+  const sfxText = document.getElementById('sfxToggleText');
+  
+  if (enabled) {
+    sfxToggle.classList.remove('disabled');
+    sfxIcon.textContent = '🔊';
+    sfxText.textContent = 'ON';
+  } else {
+    sfxToggle.classList.add('disabled');
+    sfxIcon.textContent = '🔇';
+    sfxText.textContent = 'OFF';
+  }
+  
+  playButtonSound();
+}
+
+function updateMasterVolume(value) {
+  setMasterVolume(value / 100);
+  document.getElementById('masterVolumeDisplay').textContent = value + '%';
+}
+
+function updateMusicVolume(value) {
+  setMusicVolume(value / 100);
+  document.getElementById('musicVolumeDisplay').textContent = value + '%';
+}
+
+function updateSFXVolume(value) {
+  setSFXVolume(value / 100);
+  document.getElementById('sfxVolumeDisplay').textContent = value + '%';
+  // Play a test sound
+  playTokenSound();
+}
+
+function closeModal() {
+  document.getElementById('instructionsModal').style.display = 'none';
+  document.getElementById('creditsModal').style.display = 'none';
+  document.getElementById('characterModal').style.display = 'none';
+  document.getElementById('profileModal').style.display = 'none';
+  document.getElementById('weaponModal').style.display = 'none';
+  document.getElementById('soundModal').style.display = 'none';
+}
+
+function renderCharacterGrid() {
+  const grid = document.getElementById('characterGrid');
+  grid.innerHTML = '';
+  
+  characters.forEach(character => {
+    const isUnlocked = playerData.unlockedCharacters.includes(character.id);
+    const isSelected = playerData.selectedCharacter === character.id;
+    const canAfford = playerData.mazeTokens >= character.price;
+    
+    const card = document.createElement('div');
+    card.className = `character-card ${isSelected ? 'selected' : ''} ${!isUnlocked ? 'locked' : ''}`;
+    
+    // Create character avatar display
+    let avatarHTML = '';
+    if (character.sprite && characterSprites[character.id] && characterSprites[character.id].idle && characterSprites[character.id].idle.complete) {
+      // Use sprite if available
+      avatarHTML = `<img src="${character.sprite}" class="character-sprite" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;" alt="${character.name}">`;
+    } else {
+      // Fallback to emoji
+      avatarHTML = `<div class="character-avatar">${character.avatar}</div>`;
+    }
+    
+    card.innerHTML = `
+      ${avatarHTML}
+      <div class="character-name">${character.name}</div>
+      <div class="character-rarity rarity-${character.rarity}">${character.rarity.toUpperCase()}</div>
+      <div class="character-ability">${character.ability}</div>
+      ${!isUnlocked ? `
+        <div class="character-price">🧩 ${character.price} MAZE</div>
+        <button class="purchase-btn" ${!canAfford ? 'disabled' : ''} onclick="purchaseCharacter('${character.id}')">
+          ${canAfford ? 'Purchase' : 'Not enough MAZE'}
+        </button>
+      ` : isSelected ? `
+        <div style="color: #FFD700; font-weight: bold; margin-top: 10px;">✓ SELECTED</div>
+      ` : `
+        <button class="purchase-btn" onclick="selectCharacter('${character.id}')">Select</button>
+      `}
+    `;
+    
+    grid.appendChild(card);
+  });
+}
+
+function selectCharacter(characterId) {
+  playerData.selectedCharacter = characterId;
+  savePlayerData();
+  renderCharacterGrid();
+  updateCurrencyDisplay();
+  updateProfileDisplay();
+}
+
+function purchaseCharacter(characterId) {
+  const character = characters.find(c => c.id === characterId);
+  if (playerData.mazeTokens >= character.price) {
+    playerData.mazeTokens -= character.price;
+    playerData.unlockedCharacters.push(characterId);
+    savePlayerData();
+    renderCharacterGrid();
+    updateCurrencyDisplay();
+    updateProfileDisplay();
+  }
+}
+
+function updateCurrencyDisplay() {
+  // Update game UI
+  if (document.getElementById('gameMazeTokens')) {
+    document.getElementById('gameMazeTokens').textContent = playerData.mazeTokens;
+  }
+  
+  // Update current weapon display
+  if (document.getElementById('currentWeaponName')) {
+    const currentWeapon = weaponCategories[playerData.selectedWeapon];
+    document.getElementById('currentWeaponName').textContent = currentWeapon.name;
+  }
+  
+  // Update character modal
+  if (document.getElementById('playerMazeTokens')) {
+    document.getElementById('playerMazeTokens').textContent = playerData.mazeTokens;
+  }
+  
+  // Update weapon modal
+  if (document.getElementById('weaponMazeTokens')) {
+    document.getElementById('weaponMazeTokens').textContent = playerData.mazeTokens;
+  }
+  
+  // Update profile display
+  if (document.getElementById('profileMazeTokens')) {
+    document.getElementById('profileMazeTokens').textContent = playerData.mazeTokens;
+  }
+}
+
+function getCurrentCharacter() {
+  return characters.find(c => c.id === playerData.selectedCharacter);
+}
+
+function awardCoins(amount) {
+  const character = getCurrentCharacter();
+  const multiplier = character.id === 'legend' ? 2 : 1;
+  playerData.coins += amount * multiplier;
+  savePlayerData();
+  updateCurrencyDisplay();
+}
+
+// awardMazeTokens is imported from players.js
+
+function showTokenNotification(amount, reason) {
+  const notification = document.createElement('div');
+  notification.className = 'token-notification';
+  notification.innerHTML = `
+    <div class="token-reward">
+      +${amount} 🧩 MAZE
+      <div class="token-reason">${reason}</div>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
+
+function updateProfileDisplay() {
+  try {
+  const character = getCurrentCharacter();
+  
+    // Update currency and basic stats
+    const profileMazeTokens = document.getElementById('profileMazeTokens');
+    if (profileMazeTokens) profileMazeTokens.textContent = playerData.mazeTokens;
+    
+    const profileCurrentLevel = document.getElementById('profileCurrentLevel');
+    if (profileCurrentLevel) profileCurrentLevel.textContent = gameState.currentLevel || playerData.currentLevel;
+  
+  // Update achievements
+    const profileLevels = document.getElementById('profileLevels');
+    if (profileLevels) profileLevels.textContent = playerData.totalLevelsCompleted;
+    
+    const profileBestTime = document.getElementById('profileBestTime');
+    if (profileBestTime) profileBestTime.textContent = playerData.bestTimeRecord ? `${playerData.bestTimeRecord}s` : '--';
+    
+    const profileEnemies = document.getElementById('profileEnemies');
+    if (profileEnemies) profileEnemies.textContent = playerData.totalEnemiesDefeated;
+    
+    const profileSessions = document.getElementById('profileSessions');
+    if (profileSessions) profileSessions.textContent = playerData.totalSessions;
+  
+  // Update character info
+    const profileCharacterAvatar = document.getElementById('profileCharacterAvatar');
+    if (profileCharacterAvatar) {
+      // Check if character has a sprite
+      if (character.sprite && characterSprites[character.id] && characterSprites[character.id].idle && characterSprites[character.id].idle.complete) {
+        // Create image element for sprite
+        profileCharacterAvatar.innerHTML = `<img src="${character.sprite}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 4px;" alt="${character.name}">`;
+      } else {
+        // Fallback to emoji
+        profileCharacterAvatar.textContent = character.avatar;
+      }
+    }
+    
+    const profileCharacterName = document.getElementById('profileCharacterName');
+    if (profileCharacterName) profileCharacterName.textContent = character.name;
+    
+    const profileUnlockedCount = document.getElementById('profileUnlockedCount');
+    if (profileUnlockedCount) profileUnlockedCount.textContent = playerData.unlockedCharacters.length;
+    
+    const profileUnlockedWeapons = document.getElementById('profileUnlockedWeapons');
+    if (profileUnlockedWeapons) profileUnlockedWeapons.textContent = playerData.unlockedWeapons.length;
+    
+    // Update weapon info
+    const currentWeapon = weaponCategories[playerData.selectedWeapon];
+    if (currentWeapon) {
+      const profileWeaponIcon = document.getElementById('profileWeaponIcon');
+      if (profileWeaponIcon) profileWeaponIcon.textContent = getWeaponIcon(playerData.selectedWeapon);
+      
+      const profileWeaponName = document.getElementById('profileWeaponName');
+      if (profileWeaponName) profileWeaponName.textContent = currentWeapon.name;
+    }
+  } catch (error) {
+    console.error('Error updating profile display:', error);
+  }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  const instructionsModal = document.getElementById('instructionsModal');
+  const creditsModal = document.getElementById('creditsModal');
+  const characterModal = document.getElementById('characterModal');
+  const profileModal = document.getElementById('profileModal');
+  const weaponModal = document.getElementById('weaponModal');
+  const soundModal = document.getElementById('soundModal');
+  if (event.target == instructionsModal) {
+    instructionsModal.style.display = 'none';
+  }
+  if (event.target == creditsModal) {
+    creditsModal.style.display = 'none';
+  }
+  if (event.target == characterModal) {
+    characterModal.style.display = 'none';
+  }
+  if (event.target == profileModal) {
+    profileModal.style.display = 'none';
+  }
+  if (event.target == weaponModal) {
+    weaponModal.style.display = 'none';
+  }
+  if (event.target == soundModal) {
+    soundModal.style.display = 'none';
+  }
+}
+
+// Game variables and logic
+const canvas = document.getElementById("mazeCanvas");
+const ctx = canvas.getContext("2d");
+
+// Initialize weapon system
+const weaponSystem = new WeaponSystem();
+
+// Procedural maze generation
+function generateMaze(level) {
+  const width = 24;
+  const height = 17;
+  const maze = [];
+  
+  // Initialize with all walls
+  for (let y = 0; y < height; y++) {
+    maze[y] = [];
+    for (let x = 0; x < width; x++) {
+      maze[y][x] = 1;
+    }
+  }
+  
+  // Create paths using a modified recursive backtracking algorithm
+  function carvePath(x, y) {
+    maze[y][x] = 0;
+    
+    const directions = [
+      [0, -2], [2, 0], [0, 2], [-2, 0]
+    ];
+    
+    // Shuffle directions for randomness
+    for (let i = directions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [directions[i], directions[j]] = [directions[j], directions[i]];
+    }
+    
+    for (const [dx, dy] of directions) {
+      const nx = x + dx;
+      const ny = y + dy;
+      
+      if (nx > 0 && nx < width - 1 && ny > 0 && ny < height - 1 && maze[ny][nx] === 1) {
+        maze[y + dy/2][x + dx/2] = 0; // Carve the wall between
+        carvePath(nx, ny);
+      }
+    }
+  }
+  
+  // Start carving from (1,1)
+  carvePath(1, 1);
+  
+  // Add extra paths based on level difficulty
+  const extraPaths = Math.min(level * 2, 20);
+  for (let i = 0; i < extraPaths; i++) {
+    const x = 1 + Math.floor(Math.random() * (width - 2));
+    const y = 1 + Math.floor(Math.random() * (height - 2));
+    if (maze[y][x] === 1) {
+      maze[y][x] = 0;
+    }
+  }
+  
+  // Ensure borders are walls
+  for (let x = 0; x < width; x++) {
+    maze[0][x] = 1;
+    maze[height - 1][x] = 1;
+  }
+  for (let y = 0; y < height; y++) {
+    maze[y][0] = 1;
+    maze[y][width - 1] = 1;
+  }
+  
+  // Place treasure at the bottom right
+  maze[height - 2][width - 2] = 2;
+  
+  return maze;
+}
+
+// Generate enemy configuration based on level
+// Now imported from enemies.js - enhanced enemy system with more types and better scaling
+
+// Position enemies on valid maze paths
+// Now imported from enemies.js - enhanced positioning with strategic placement
+
+const mazes = [
+  generateMaze(1),
+  generateMaze(2),
+  generateMaze(3),
+  generateMaze(4),
+  generateMaze(5),
+  generateMaze(6),
+  generateMaze(7),
+  generateMaze(8),
+  generateMaze(9),
+  generateMaze(10)
+];
+
+// Update level initialization
+function initializeLevel(level) {
+  // Use procedural generation for levels beyond the predefined ones
+  if (level <= 10) {
+    gameState.maze = generateMaze(level);
+  } else {
+    // For levels 11-50, use more complex procedural generation
+    gameState.maze = generateMaze(level);
+  }
+  
+  // Use enhanced enemy system
+  gameState.enemies = generateEnemies(level);
+  positionEnemies(gameState.maze, gameState.enemies);
+  gameState.player = { x: 1, y: 1 };
+  gameState.particles = [];
+  
+  const character = getCurrentCharacter();
+  gameState.weaponSystem.setAmmo(10 + character.ammoBonus + Math.floor(level / 10)); // Bonus ammo at higher levels
+  playerData.playerHealth = 1 + character.healthBonus;
+  playerData.maxHealth = 1 + character.healthBonus;
+  playerData.damageTaken = false;
+  
+  gameState.steps = 0;
+  gameState.startTime = Date.now();
+  gameState.lastEnemyMoveTime = Date.now();
+  gameState.gameRunning = true;
+  
+  updateGameInfo();
+  drawMaze();
+  
+  // Set the selected weapon
+  gameState.weaponSystem.setWeapon(playerData.selectedWeapon);
+  const weaponConfig = gameState.weaponSystem.getCurrentWeapon();
+  gameState.weaponSystem.setAmmo(weaponConfig.ammoCapacity + character.ammoBonus + Math.floor(level / 10));
+}
+
+// Update nextLevel function
+function nextLevel() {
+  gameState.currentLevel++;
+  
+  if (gameState.currentLevel > gameState.MAX_LEVELS) {
+    // Game completed!
+    showGameCompleted();
+    return;
+  }
+  
+  document.getElementById("victoryPopup").style.display = "none";
+  initializeLevel(gameState.currentLevel);
+}
+
+// Add game completion screen
+function showGameCompleted() {
+  const completionScreen = document.createElement('div');
+  completionScreen.className = 'victory-popup';
+  completionScreen.style.display = 'block';
+  completionScreen.innerHTML = `
+    <h2>🎉 CONGRATULATIONS!</h2>
+    <p>You've mastered all 50 levels of the Treasure Maze Adventure!</p>
+    <p><strong>Total Enemies Defeated:</strong> ${gameState.enemiesDefeated}</p>
+    <p><strong>Best Time:</strong> ${playerData.bestTimeRecord}s</p>
+    <p>You are a true Maze Master! 👑</p>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
+      <button class="restart-btn" onclick="showShareScore()" style="background: linear-gradient(145deg, #27ae60, #219a52);">📤 Share Achievement</button>
+      <button class="restart-btn" onclick="returnToMainMenu()">Return to Main Menu</button>
+      <button class="restart-btn" onclick="restartGame()">Play Again</button>
+    </div>
+  `;
+  document.body.appendChild(completionScreen);
+  
+  // Award bonus MAZE tokens for completing all levels
+  awardMazeTokens(100, "Game Master Bonus!");
+  gameSession.mazeTokensEarned += 100;
+}
+
+// Add restart game function
+function restartGame() {
+  gameState.currentLevel = 1;
+  gameState.playerLives = 3;
+  
+  // Remove completion screen
+  const completionScreen = document.querySelector('.victory-popup');
+  if (completionScreen) {
+    completionScreen.remove();
+  }
+  
+  initializeLevel(1);
+}
+
+// Update the initial game setup
+function initializeGame() {
+  loadPlayerData();
+  gameState.currentLevel = 1;
+  gameState.playerLives = 3;
+  initializeGameSession(); // Initialize session tracking
+  initializeLevel(1);
+  updateCurrencyDisplay();
+  gameLoop();
+}
+
+// Update resetLevel to use the new system
+function resetLevel() {
+  initializeLevel(gameState.currentLevel);
+}
+
+// Update game info display to include lives
+function updateGameInfo() {
+  document.getElementById("stepCount").textContent = gameState.steps;
+  document.getElementById("timeCount").textContent = Math.floor((Date.now() - gameState.startTime) / 1000);
+  document.getElementById("levelCount").textContent = gameState.currentLevel;
+  document.getElementById("ammoCount").textContent = gameState.weaponSystem.getAmmo();
+  document.getElementById("livesCount").textContent = gameState.playerLives;
+  document.getElementById("killCount").textContent = gameState.enemiesDefeated;
+  
+  // Update current level in player data in real-time
+  if (playerData.currentLevel !== gameState.currentLevel) {
+    playerData.currentLevel = gameState.currentLevel;
+    savePlayerData();
+    updateProfileDisplay();
+  }
+}
+
+class Particle {
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.vx = (Math.random() - 0.5) * 4;
+    this.vy = (Math.random() - 0.5) * 4;
+    this.life = 30;
+    this.maxLife = 30;
+    this.color = color;
+  }
+  
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life--;
+    this.vx *= 0.98;
+    this.vy *= 0.98;
+  }
+  
+  draw() {
+    const { ctx } = gameState;
+    const alpha = this.life / this.maxLife;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+class Projectile {
+  constructor(x, y, dx, dy) {
+    this.x = x * tileSize + tileSize / 2;
+    this.y = y * tileSize + tileSize / 2;
+    this.vx = dx * 5;
+    this.vy = dy * 5;
+    this.life = 50;
+  }
+  
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life--;
+    
+    const gridX = Math.floor(this.x / tileSize);
+    const gridY = Math.floor(this.y / tileSize);
+    
+    if (gridX >= 0 && gridX < gameState.maze[0].length && gridY >= 0 && gridY < gameState.maze.length && gameState.maze[gridY][gridX] === 1) {
+      this.life = 0;
+      createParticles(this.x, this.y, "#ffffff", 5);
+    }
+    
+    for (let i = gameState.enemies.length - 1; i >= 0; i--) {
+      const enemy = gameState.enemies[i];
+      const distX = (enemy.x * tileSize + tileSize / 2) - this.x;
+      const distY = (enemy.y * tileSize + tileSize / 2) - this.y;
+      if (Math.sqrt(distX * distX + distY * distY) < 20) {
+        this.life = 0;
+        enemy.health--;
+        enemy.flash = 10; // Flash for 10 frames
+        playEnemyHitSound(); // Play hit sound
+        createParticles(enemy.x * tileSize + tileSize / 2, enemy.y * tileSize + tileSize / 2, "#e74c3c", 5);
+        if (enemy.health <= 0) {
+          gameState.enemies.splice(i, 1);
+          gameState.enemiesDefeated++;
+          
+          // Play enemy death sound
+          playEnemyDeathSound();
+          
+          // Update total enemies defeated in real-time
+          playerData.totalEnemiesDefeated++;
+          gameSession.sessionEnemiesDefeated++;
+          savePlayerData();
+          updateProfileDisplay();
+          
+          createParticles(enemy.x * gameState.tileSize + gameState.tileSize / 2, enemy.y * gameState.tileSize + gameState.tileSize / 2, "#e74c3c", 10);
+        }
+      }
+    }
+  }
+  
+  draw() {
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function createParticles(x, y, color, count = 8) {
+  for (let i = 0; i < count; i++) {
+    gameState.particles.push(new Particle(x, y, color));
+  }
+}
+
+function updateParticles() {
+  gameState.particles = gameState.particles.filter(p => p.life > 0);
+  gameState.particles.forEach(p => {
+    p.update();
+    p.draw();
+  });
+}
+
+function findPath(startX, startY, targetX, targetY) {
+  const queue = [{ x: startX, y: startY, path: [] }];
+  const visited = new Set();
+  visited.add(`${startX},${startY}`);
+  
+  const directions = [
+    { x: 0, y: -1 }, // Up
+    { x: 0, y: 1 },  // Down
+    { x: -1, y: 0 }, // Left
+    { x: 1, y: 0 }   // Right
+  ];
+  
+  while (queue.length > 0) {
+    const { x, y, path } = queue.shift();
+    
+    if (x === targetX && y === targetY) {
+      return path.length > 0 ? path[0] : { x: 0, y: 0 };
+    }
+    
+    for (const dir of directions) {
+      const newX = x + dir.x;
+      const newY = y + dir.y;
+      const key = `${newX},${newY}`;
+      
+      if (
+        newX >= 0 && newX < gameState.maze[0].length &&
+        newY >= 0 && newY < gameState.maze.length &&
+        gameState.maze[newY][newX] !== 1 &&
+        !visited.has(key)
+      ) {
+        visited.add(key);
+        queue.push({ x: newX, y: newY, path: [...path, dir] });
+      }
+    }
+  }
+  
+  return null; // No path found
+}
+
+function updateEnemies() {
+  if (Date.now() - gameState.lastEnemyMoveTime < gameState.ENEMY_MOVE_INTERVAL) return;
+  gameState.lastEnemyMoveTime = Date.now();
+  
+  gameState.enemies.forEach(enemy => {
+    if (enemy.flash > 0) enemy.flash--;
+    
+    // Calculate distance to player
+    const distX = Math.abs(enemy.x - gameState.player.x);
+    const distY = Math.abs(enemy.y - gameState.player.y);
+    const distance = distX + distY;
+    
+    // Enhanced enemy behavior based on move pattern
+    if (distance <= enemy.visionRange) {
+      // Chase player using pathfinding with enhanced behavior patterns
+      const nextMove = findPath(enemy.x, enemy.y, gameState.player.x, gameState.player.y);
+      if (nextMove) {
+        let moveChance = 1;
+        
+        // Enhanced type-specific behaviors based on move patterns
+        switch(enemy.movePattern) {
+          case 'persistent':
+            // Chasers are persistent and relentless
+            moveChance = 1;
+            break;
+          case 'evasive':
+            // Dodgers are evasive and unpredictable
+            moveChance = Math.random() < 0.4 ? 0.3 : 1.2; // Sometimes dodge, sometimes rush
+            // Occasionally change direction randomly
+            if (Math.random() < 0.2) {
+              const randomDirections = [
+                { x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 1, y: 0 }
+              ];
+              const randomDir = randomDirections[Math.floor(Math.random() * randomDirections.length)];
+              const dodgeX = enemy.x + randomDir.x;
+              const dodgeY = enemy.y + randomDir.y;
+              if (dodgeX >= 0 && dodgeX < gameState.maze[0].length && 
+                  dodgeY >= 0 && dodgeY < gameState.maze.length && 
+                  gameState.maze[dodgeY][dodgeX] !== 1) {
+                enemy.x = dodgeX;
+                enemy.y = dodgeY;
+                createParticles(enemy.x * gameState.tileSize + gameState.tileSize/2, 
+                              enemy.y * gameState.tileSize + gameState.tileSize/2, 
+                              '#2ecc71', 6);
+                return; // Skip normal movement
+              }
+            }
+            break;
+          case 'stealth':
+            // Ninjas use stealth tactics
+            moveChance = 1;
+            // Can occasionally phase through walls
+            if (Math.random() < 0.08) { // 8% chance to phase
+              enemy.x = gameState.player.x + (Math.random() < 0.5 ? -1 : 1);
+              enemy.y = gameState.player.y + (Math.random() < 0.5 ? -1 : 1);
+              createParticles(enemy.x * gameState.tileSize + gameState.tileSize/2, 
+                            enemy.y * gameState.tileSize + gameState.tileSize/2, 
+                            '#34495e', 8);
+              return; // Skip normal movement
+            }
+            break;
+          case 'aggressive':
+            // Melee fighters are aggressive and charge forward
+            moveChance = distance < 4 ? 1.5 : 1; // More aggressive when close
+            break;
+          case 'relentless':
+            // Elite chasers are even more persistent
+            moveChance = 1.2;
+            // Extended tracking ability
+            if (distance > enemy.visionRange && enemy.lastPlayerPosition) {
+              const trackingMove = findPath(enemy.x, enemy.y, enemy.lastPlayerPosition.x, enemy.lastPlayerPosition.y);
+              if (trackingMove) {
+                enemy.x += trackingMove.x;
+                enemy.y += trackingMove.y;
+                return;
+              }
+            }
+            enemy.lastPlayerPosition = { x: gameState.player.x, y: gameState.player.y };
+            break;
+          case 'shadow':
+            // Shadow dodgers can briefly become invisible
+            moveChance = Math.random() < 0.3 ? 0.2 : 1.5; // Very evasive or very fast
+            if (Math.random() < 0.05) { // 5% chance to go invisible
+              enemy.invisible = 30; // Invisible for 30 frames
+              createParticles(enemy.x * gameState.tileSize + gameState.tileSize/2, 
+                            enemy.y * gameState.tileSize + gameState.tileSize/2, 
+                            '#27ae60', 10);
+            }
+            break;
+          case 'teleport':
+            // Master ninjas can teleport
+            moveChance = 1.2;
+            if (Math.random() < 0.06 && distance > 3) { // 6% chance when not too close
+              const teleportPositions = [];
+              for (let dx = -2; dx <= 2; dx++) {
+                for (let dy = -2; dy <= 2; dy++) {
+                  const newX = gameState.player.x + dx;
+                  const newY = gameState.player.y + dy;
+                  if (newX >= 0 && newX < gameState.maze[0].length && 
+                      newY >= 0 && newY < gameState.maze.length && 
+                      gameState.maze[newY][newX] !== 1) {
+                    teleportPositions.push({x: newX, y: newY});
+                  }
+                }
+              }
+              if (teleportPositions.length > 0) {
+                const teleportPos = teleportPositions[Math.floor(Math.random() * teleportPositions.length)];
+                enemy.x = teleportPos.x;
+                enemy.y = teleportPos.y;
+                createParticles(enemy.x * gameState.tileSize + gameState.tileSize/2, 
+                              enemy.y * gameState.tileSize + gameState.tileSize/2, 
+                              '#2c3e50', 12);
+                return;
+              }
+            }
+            break;
+          case 'berserker':
+            // Berserker melees get faster when damaged
+            const healthRatio = enemy.health / enemy.maxHealth;
+            moveChance = 1 + (1 - healthRatio) * 0.8; // Up to 80% faster when low health
+            // Charge ability when very damaged
+            if (healthRatio < 0.3 && distance < 6) {
+              moveChance = 2; // Double speed charge
+            }
+            break;
+          case 'apex':
+            // Apex hunters combine all abilities
+            moveChance = 1.5;
+            // Can see player from anywhere
+            if (distance > enemy.visionRange) {
+              enemy.visionRange = 25; // Extended vision
+            }
+            // Occasional teleport
+            if (Math.random() < 0.04 && distance > 4) {
+              const teleportPos = {
+                x: gameState.player.x + (Math.random() < 0.5 ? -2 : 2),
+                y: gameState.player.y + (Math.random() < 0.5 ? -2 : 2)
+              };
+              if (teleportPos.x >= 0 && teleportPos.x < gameState.maze[0].length && 
+                  teleportPos.y >= 0 && teleportPos.y < gameState.maze.length && 
+                  gameState.maze[teleportPos.y][teleportPos.x] !== 1) {
+                enemy.x = teleportPos.x;
+                enemy.y = teleportPos.y;
+                createParticles(enemy.x * gameState.tileSize + gameState.tileSize/2, 
+                              enemy.y * gameState.tileSize + gameState.tileSize/2, 
+                              '#000000', 15);
+                return;
+              }
+            }
+            break;
+          case 'commanding':
+            // Void guardians boost nearby enemies
+            gameState.enemies.forEach(otherEnemy => {
+              if (otherEnemy !== enemy) {
+                const otherDist = Math.abs(otherEnemy.x - enemy.x) + Math.abs(otherEnemy.y - enemy.y);
+                if (otherDist <= 4) {
+                  otherEnemy.speed = Math.min(otherEnemy.speed * 1.15, 3); // 15% speed boost
+                  otherEnemy.visionRange = Math.min(otherEnemy.visionRange * 1.2, 20); // Vision boost
+                }
+              }
+            });
+            moveChance = 1;
+            break;
+          default:
+            moveChance = 1;
+        }
+        
+        // Apply speed and chance-based movement
+        if (Math.random() < moveChance * enemy.speed) {
+        const newX = enemy.x + nextMove.x;
+        const newY = enemy.y + nextMove.y;
+        if (newX >= 0 && newX < gameState.maze[0].length && newY >= 0 && newY < gameState.maze.length && gameState.maze[newY][newX] !== 1) {
+          enemy.x = newX;
+          enemy.y = newY;
+            
+            // Create movement particles based on enemy rarity
+            const particleCount = enemy.rarity === 'legendary' ? 4 : enemy.rarity === 'epic' ? 3 : 2;
+            createParticles(
+              enemy.x * gameState.tileSize + gameState.tileSize/2, 
+              enemy.y * gameState.tileSize + gameState.tileSize/2, 
+              enemy.color, 
+              particleCount
+            );
+          }
+        }
+      }
+    } else {
+      // Patrol behavior with enemy-specific patterns
+      let shouldMove = Math.random() < enemy.speed;
+      
+      if (shouldMove) {
+      const newX = enemy.x + enemy.direction.x;
+      const newY = enemy.y + enemy.direction.y;
+      
+      if (
+        newX >= 0 && newX < gameState.maze[0].length &&
+        newY >= 0 && newY < gameState.maze.length &&
+        gameState.maze[newY][newX] !== 1
+      ) {
+        enemy.x = newX;
+        enemy.y = newY;
+      } else {
+        enemy.pathIndex = (enemy.pathIndex + 1) % enemy.path.length;
+        enemy.direction = enemy.path[enemy.pathIndex];
+        }
+      }
+    }
+    
+    // Check for collision with player
+    if (enemy.x === gameState.player.x && enemy.y === gameState.player.y) {
+      const damage = enemy.damage || 1; // Use enemy's damage value
+      
+      gameState.playerLives--;
+      trackLifeLost(); // Track life lost in session
+      
+      // Update player data in real-time
+      playerData.damageTaken = true;
+      savePlayerData();
+      updateGameInfo();
+      updateProfileDisplay();
+      
+      // Create damage effect with rarity-based intensity
+      const particleCount = enemy.rarity === 'legendary' ? 15 : enemy.rarity === 'epic' ? 12 : 10;
+      createParticles(
+        gameState.player.x * gameState.tileSize + gameState.tileSize/2, 
+        gameState.player.y * gameState.tileSize + gameState.tileSize/2, 
+        '#FF0000', 
+        particleCount
+      );
+      
+      // Move player to safe position
+      gameState.player.x = 1;
+      gameState.player.y = 1;
+      
+      if (gameState.playerLives <= 0) {
+        // Game Over - all lives lost
+        gameState.gameRunning = false;
+        showGameOver();
+      } else {
+        // Just flash the player and continue the game
+        enemy.flash = 20;
+      }
+    }
+  });
+}
+
+function updateProjectiles() {
+  gameState.projectiles = gameState.projectiles.filter(p => p.life > 0);
+  gameState.projectiles.forEach(p => {
+    p.update();
+    p.draw();
+  });
+}
+
+function drawMaze() {
+  const { ctx, canvas, tileSize } = gameState;
+  // Changed background to very dark for better contrast
+  ctx.fillStyle = "#0a0a0a";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw maze
+  for (let y = 0; y < gameState.maze.length; y++) {
+    for (let x = 0; x < gameState.maze[y].length; x++) {
+      const posX = x * gameState.tileSize;
+      const posY = y * gameState.tileSize;
+      
+      if (gameState.maze[y][x] === 1) {
+        // Orange walls (previously path color)
+        const gradient = ctx.createLinearGradient(posX, posY, posX + gameState.tileSize, posY + gameState.tileSize);
+        gradient.addColorStop(0, "#ff8c00");
+        gradient.addColorStop(1, "#e67e22");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(posX, posY, gameState.tileSize, gameState.tileSize);
+        
+        // Orange border for walls
+        ctx.strokeStyle = "#d35400";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(posX, posY, gameState.tileSize, gameState.tileSize);
+      } else if (gameState.maze[y][x] === 0) {
+        // Dark paths (previously wall color)
+        const pathGradient = ctx.createLinearGradient(posX, posY, posX + gameState.tileSize, posY + gameState.tileSize);
+        pathGradient.addColorStop(0, "#1a1a1a");
+        pathGradient.addColorStop(1, "#0f0f0f");
+        ctx.fillStyle = pathGradient;
+        ctx.fillRect(posX, posY, gameState.tileSize, gameState.tileSize);
+        
+        // Dark border for paths
+        ctx.strokeStyle = "#050505";
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(posX, posY, gameState.tileSize, gameState.tileSize);
+      } else if (gameState.maze[y][x] === 2) {
+        // Treasure chest - keep the existing golden effect but on dark background
+        const time = Date.now() * 0.003;
+        const glow = Math.sin(time) * 0.3 + 0.7;
+        
+        // Dark path background first
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fillRect(posX, posY, gameState.tileSize, gameState.tileSize);
+        
+        // Golden glow effect
+        ctx.fillStyle = `rgba(255, 215, 0, ${glow * 0.4})`;
+        ctx.fillRect(posX - 5, posY - 5, gameState.tileSize + 10, gameState.tileSize + 10);
+        
+        ctx.fillStyle = "#FFD700";
+        ctx.fillRect(posX + 5, posY + 10, gameState.tileSize - 10, gameState.tileSize - 15);
+        ctx.fillStyle = "#FFA500";
+        ctx.fillRect(posX + 8, posY + 8, gameState.tileSize - 16, 8);
+        
+        ctx.fillStyle = "#8B4513";
+        ctx.fillRect(posX + 10, posY + 12, gameState.tileSize - 20, 2);
+        ctx.fillRect(posX + 18, posY + 8, 4, 6);
+        
+        if (Math.random() < 0.1) {
+          createParticles(posX + gameState.tileSize/2, posY + gameState.tileSize/2, "#FFD700", 2);
+        }
+      }
+    }
+  }
+
+  // Draw enemies using enhanced system
+  gameState.enemies.forEach(enemy => drawEnemy(enemy, ctx, gameState.tileSize));
+
+  // Draw player
+  const playerX = gameState.player.x * gameState.tileSize + gameState.tileSize / 2;
+  const playerY = gameState.player.y * gameState.tileSize + gameState.tileSize / 2;
+  const character = getCurrentCharacter();
+  
+  // Draw player sprite or fallback to emoji
+  const playerSprite = characterSprites[character.id];
+  let spriteDrawn = false;
+  
+  if (playerSprite && playerSprite.idle && playerSprite.idle.complete && playerSprite.idle.naturalWidth > 0) {
+    // Draw sprite - reduced by 40% from previous size
+    const spriteSize = (gameState.tileSize + 8) * 1.2; // Reduced by 40% (was * 2, now * 1.2)
+    const spriteX = gameState.player.x * gameState.tileSize - (spriteSize - gameState.tileSize) / 2; // Center the larger sprite
+    const spriteY = gameState.player.y * gameState.tileSize - (spriteSize - gameState.tileSize) / 2; // Center the larger sprite
+    
+    // Draw the sprite without any shadow effects
+    ctx.drawImage(playerSprite.idle, spriteX, spriteY, spriteSize, spriteSize);
+    spriteDrawn = true;
+  }
+  
+  // Fallback to emoji if sprite not available
+  if (!spriteDrawn) {
+    ctx.font = "34px Arial"; // Reduced by 40% (was 56px, now 34px)
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#FFD700";
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 2; // Reduced stroke width
+    ctx.strokeText(character.avatar, playerX, playerY + 8);
+  ctx.fillText(character.avatar, playerX, playerY + 8);
+  }
+  
+  // Draw health indicators
+  if (playerData.playerHealth > 1) {
+    ctx.fillStyle = "#FF0000";
+    for (let i = 0; i < playerData.playerHealth; i++) {
+      ctx.beginPath();
+      ctx.arc(playerX - 10 + (i * 8), playerY - 20, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  // Draw weapon system
+  gameState.weaponSystem.draw(ctx);
+  
+  updateParticles();
+  
+  // Update weapon system
+  const newDefeatedEnemies = gameState.weaponSystem.update(gameState.maze, gameState.enemies, createParticles, gameState.player);
+  if (newDefeatedEnemies > 0) {
+  gameState.enemiesDefeated += newDefeatedEnemies;
+    
+    // Update total enemies defeated in real-time
+    playerData.totalEnemiesDefeated += newDefeatedEnemies;
+    gameSession.sessionEnemiesDefeated += newDefeatedEnemies;
+    savePlayerData();
+    updateProfileDisplay();
+  }
+  
+  // Update floating reward texts
+  updateFloatingTexts();
+}
+
+function movePlayer(dx, dy) {
+  if (!gameState.gameRunning) return;
+  
+  const newX = gameState.player.x + dx;
+  const newY = gameState.player.y + dy;
+  
+  if (newY >= 0 && newY < gameState.maze.length && newX >= 0 && newX < gameState.maze[0].length && gameState.maze[newY][newX] !== 1) {
+    gameState.player.x = newX;
+    gameState.player.y = newY;
+    gameState.steps++;
+    
+    // Play movement sound
+    playMoveSound();
+    
+    // Update game info in real-time
+    updateGameInfo();
+    
+    createParticles(newX * gameState.tileSize + gameState.tileSize/2, newY * gameState.tileSize + gameState.tileSize/2, "#3498db", 3);
+    
+    if (gameState.maze[newY][newX] === 2) {
+      gameState.gameRunning = false;
+      playTreasureSound();
+      setTimeout(() => {
+        showVictory();
+      }, 500);
+    }
+  }
+  
+  drawMaze();
+}
+
+function shoot() {
+  if (!gameState.gameRunning) return;
+  playShootSound();
+  gameState.weaponSystem.shoot(gameState.player.x, gameState.player.y, createParticles, gameState.tileSize);
+  
+  // Update ammo display in real-time
+  updateGameInfo();
+}
+
+// Update showVictory to track session stats
+function showVictory() {
+  const endTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+  document.getElementById("finalSteps").textContent = gameState.steps;
+  document.getElementById("finalTime").textContent = endTime;
+  document.getElementById("finalEnemies").textContent = gameState.enemiesDefeated;
+  document.getElementById("victoryPopup").style.display = "block";
+  
+  // Play level complete sound
+  playLevelCompleteSound();
+  
+  // Check if all enemies were defeated
+  const allEnemiesDefeated = gameState.enemies.length === 0 && gameState.enemiesDefeated > 0;
+  
+  // Track achievements for this level
+  const achievements = {
+    perfectRun: !playerData.damageTaken,
+    speedBonus: endTime < 20,
+    streakBonus: playerData.totalLevelsCompleted % 5 === 0,
+    enemyExterminator: allEnemiesDefeated
+  };
+  
+  // Update session stats
+  updateSessionStats(endTime, gameState.steps, gameState.enemiesDefeated, achievements);
+  
+  // Award MAZE tokens based on performance
+  let tokensEarned = 0;
+  
+  // Base completion reward
+  tokensEarned += 3;
+  awardMazeTokens(3, "Level Completed!");
+  
+  // Speed bonus (under 20 seconds)
+  if (achievements.speedBonus) {
+    tokensEarned += 2;
+    awardMazeTokens(2, "Speed Bonus!");
+  }
+  
+  // Perfect run (no damage taken)
+  if (achievements.perfectRun) {
+    tokensEarned += 3;
+    awardMazeTokens(3, "Perfect Run!");
+  }
+  
+  // Enemy exterminator (defeated all enemies)
+  if (achievements.enemyExterminator) {
+    tokensEarned += 5;
+    awardMazeTokens(5, "Enemy Exterminator!");
+  }
+  
+  // Streak bonus (5+ levels completed)
+  if (achievements.streakBonus) {
+    tokensEarned += 5;
+    awardMazeTokens(5, "Streak Bonus!");
+  }
+  
+  // Track tokens earned in session
+  gameSession.mazeTokensEarned += tokensEarned;
+  
+  // Update player statistics
+  // playerData.totalEnemiesDefeated += gameState.enemiesDefeated; // Removed: already tracked in real-time
+  
+  // Only increment total levels if this is a new record
+  if (gameState.currentLevel > playerData.totalLevelsCompleted) {
+    playerData.totalLevelsCompleted = gameState.currentLevel;
+  }
+  
+  // Update current level tracking
+  playerData.currentLevel = gameState.currentLevel;
+  
+  // Update best time record
+  if (!playerData.bestTimeRecord || endTime < playerData.bestTimeRecord) {
+    playerData.bestTimeRecord = endTime;
+  }
+  
+  // Save data and update all displays
+  savePlayerData();
+  updateCurrencyDisplay();
+  updateProfileDisplay();
+  
+  createParticles(canvas.width/2, canvas.height/2, "#FFD700", 20);
+}
+
+// awardMazeTokens is imported from players.js
+
+function updateTimer() {
+  if (gameState.gameRunning) {
+    const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+    document.getElementById("timeCount").textContent = elapsed;
+  }
+}
+
+document.addEventListener("keydown", function(e) {
+  e.preventDefault();
+  switch (e.key) {
+    case "ArrowUp": movePlayer(0, -1); break;
+    case "ArrowDown": movePlayer(0, 1); break;
+    case "ArrowLeft": movePlayer(-1, 0); break;
+    case "ArrowRight": movePlayer(1, 0); break;
+    case " ": shoot(); break;
+  }
+});
+
+let touchStartX, touchStartY;
+
+canvas.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  touchStartX = touch.clientX - rect.left;
+  touchStartY = touch.clientY - rect.top;
+});
+
+canvas.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  const touch = e.changedTouches[0];
+  const rect = canvas.getBoundingClientRect();
+  const touchEndX = touch.clientX - rect.left;
+  const touchEndY = touch.clientY - rect.top;
+  
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (deltaX > 20) movePlayer(1, 0);
+    else if (deltaX < -20) movePlayer(-1, 0);
+  } else {
+    if (deltaY > 20) movePlayer(0, 1);
+    else if (deltaY < -20) movePlayer(0, -1);
+  }
+});
+
+function gameLoop() {
+  if (gameState.gameRunning) {
+    updateEnemies();
+  }
+  drawMaze();
+  requestAnimationFrame(gameLoop);
+}
+
+// Add periodic sync to ensure data consistency during gameplay
+function periodicSync() {
+  if (gameState.gameRunning) {
+    // Update current level tracking
+    if (playerData.currentLevel !== gameState.currentLevel) {
+      playerData.currentLevel = gameState.currentLevel;
+    }
+    
+    // Save data and update displays
+    savePlayerData();
+    updateCurrencyDisplay();
+    
+    // Only update profile if modal is visible to avoid performance issues
+    if (document.getElementById('profileModal').style.display === 'block') {
+      updateProfileDisplay();
+    }
+  }
+}
+
+// Set up periodic sync every 5 seconds
+setInterval(periodicSync, 5000);
+
+setInterval(updateTimer, 1000);
+
+// Initialize player data when page loads
+loadPlayerData();
+
+// Try to start background music when page is ready
+document.addEventListener('DOMContentLoaded', () => {
+  // Add a visual indicator for audio activation
+  const audioPrompt = document.createElement('div');
+  audioPrompt.id = 'audioPrompt';
+  audioPrompt.innerHTML = `
+    <div style="position: fixed; top: 20px; right: 20px; background: linear-gradient(145deg, #FFD700, #FFA500); 
+         color: #000; padding: 10px 15px; border-radius: 10px; z-index: 9999; font-weight: bold;
+         box-shadow: 0 4px 8px rgba(255,140,0,0.4); border: 2px solid #FF8C00;">
+      🎵 Click anywhere to start audio!
+    </div>
+  `;
+  document.body.appendChild(audioPrompt);
+  
+  // Remove prompt and start music on first interaction
+  const startAudio = () => {
+    audioPrompt.remove();
+    if (window.startBackgroundMusic) {
+      console.log('🎵 Starting background music from user interaction...');
+      setTimeout(() => startBackgroundMusic(), 100);
+    }
+  };
+  
+  document.addEventListener('click', startAudio, { once: true });
+  document.addEventListener('keydown', startAudio, { once: true });
+  document.addEventListener('touchstart', startAudio, { once: true });
+});
+
+// Update enemy rendering
+// Now imported from enemies.js - enhanced rendering with new shapes and rarity effects
+
+// Add game over screen
+function showGameOver() {
+  // Play game over sound
+  playGameOverSound();
+  
+  // Update session stats with current level data before showing game over
+  const currentTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+  gameSession.sessionEnemiesDefeated += gameState.enemiesDefeated; // Add current level's enemies to session total
+  gameSession.totalSteps += gameState.steps;
+  gameSession.totalTime += currentTime;
+  gameSession.endTime = Date.now(); // Set end time for session
+  
+  const gameOverScreen = document.createElement('div');
+  gameOverScreen.className = 'game-over';
+  gameOverScreen.style.display = 'block';
+  gameOverScreen.innerHTML = `
+    <h2>💔 Game Over!</h2>
+    <p>You've lost all your lives!</p>
+    <p><strong>Level Reached:</strong> ${gameState.currentLevel}</p>
+    <p><strong>Enemies Defeated:</strong> ${gameState.enemiesDefeated}</p>
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
+      <button class="restart-btn" onclick="showShareScore(); playButtonSound();" style="background: linear-gradient(145deg, #27ae60, #219a52);">📤 Share Score</button>
+      <button class="restart-btn" onclick="returnToMainMenu(); playButtonSound();">Return to Main Menu</button>
+    </div>
+  `;
+  document.body.appendChild(gameOverScreen);
+}
+
+// Add function to return to main menu
+function returnToMainMenu() {
+  // Remove game over screen if it exists
+  const gameOverScreen = document.querySelector('.game-over');
+  if (gameOverScreen) {
+    gameOverScreen.remove();
+  }
+  
+  // Reset game state
+  gameState.currentLevel = 1;
+  gameState.playerLives = 3;
+  
+  // Hide game container and show main menu
+  document.getElementById('gameContainer').classList.remove('active');
+  document.getElementById('mainMenu').style.display = 'flex';
+}
+
+// Update initializeGame to use new system
+function initializeGameNew() {
+  loadPlayerData();
+  gameState.currentLevel = 1;
+  gameState.playerLives = 3;
+  gameState.enemiesDefeated = 0; // Reset enemies defeated when starting new game
+  initializeGameSession(); // Initialize session tracking
+  initializeLevel(1);
+  updateCurrencyDisplay();
+  gameLoop();
+}
+
+// Updated nextLevel function to handle 50 levels
+function nextLevelNew() {
+  gameState.currentLevel++;
+  
+  if (gameState.currentLevel > gameState.MAX_LEVELS) {
+    // Game completed!
+    showGameCompleted();
+    return;
+  }
+  
+  // Update current level tracking
+  playerData.currentLevel = gameState.currentLevel;
+  savePlayerData();
+  updateCurrencyDisplay();
+  updateProfileDisplay();
+  
+  document.getElementById("victoryPopup").style.display = "none";
+  // Don't reset enemiesDefeated here
+  initializeLevel(gameState.currentLevel);
+}
+
+// Update resetLevel to use the new system
+function resetLevelNew() {
+  initializeLevel(gameState.currentLevel);
+}
+
+// Add score tracking and sharing system
+let gameSession = {
+  startTime: null,
+  endTime: null,
+  totalSteps: 0,
+  totalTime: 0,
+  levelsCompleted: 0,
+  totalEnemiesDefeated: 0,
+  mazeTokensEarned: 0,
+  livesLost: 0,
+  perfectRuns: 0,
+  speedBonuses: 0,
+  streakBonuses: 0,
+  character: '',
+  achievements: []
+};
+
+// Track game session data
+function initializeGameSession() {
+  // Reset session-specific counters
+  gameState.enemiesDefeated = 0;
+  
+  // Update session tracking
+  playerData.totalSessions++;
+  playerData.currentLevel = gameState.currentLevel;
+  playerData.lastPlayedDate = new Date().toISOString().split('T')[0];
+  savePlayerData();
+  updateCurrencyDisplay();
+  updateProfileDisplay();
+  
+  gameSession = {
+    startTime: Date.now(),
+    endTime: null,
+    totalSteps: 0,
+    totalTime: 0,
+    levelsCompleted: 0,
+    totalEnemiesDefeated: 0,
+    mazeTokensEarned: 0,
+    livesLost: 0,
+    perfectRuns: 0,
+    speedBonuses: 0,
+    streakBonuses: 0,
+    character: getCurrentCharacter().name,
+    achievements: [],
+    sessionLevelsCompleted: 0,
+    sessionEnemiesDefeated: 0  // Initialize to 0
+  };
+}
+
+// Update session stats when level is completed
+function updateSessionStats(levelTime, levelSteps, levelEnemies, achievements) {
+  gameSession.totalSteps += levelSteps;
+  gameSession.totalTime += levelTime;
+  gameSession.sessionLevelsCompleted++;
+  gameSession.sessionEnemiesDefeated += levelEnemies; // Add to the total instead of overwriting
+  
+  // Track achievements
+  if (achievements.perfectRun) {
+    gameSession.perfectRuns++;
+    gameSession.achievements.push(`Perfect Run (Level ${gameState.currentLevel})`);
+  }
+  if (achievements.speedBonus) {
+    gameSession.speedBonuses++;
+    gameSession.achievements.push(`Speed Bonus (Level ${gameState.currentLevel})`);
+  }
+  if (achievements.streakBonus) {
+    gameSession.streakBonuses++;
+    gameSession.achievements.push(`Streak Bonus (Level ${gameState.currentLevel})`);
+  }
+}
+
+// Track lives lost
+function trackLifeLost() {
+  gameSession.livesLost++;
+}
+
+// Generate comprehensive score report
+function generateScoreReport() {
+  const sessionTime = gameSession.endTime ? 
+    Math.floor((gameSession.endTime - gameSession.startTime) / 1000) : 
+    Math.floor((Date.now() - gameSession.startTime) / 1000);
+    
+  const averageTimePerLevel = gameSession.sessionLevelsCompleted > 0 ? 
+    Math.floor(gameSession.totalTime / gameSession.sessionLevelsCompleted) : 0;
+    
+  const averageStepsPerLevel = gameSession.sessionLevelsCompleted > 0 ? 
+    Math.floor(gameSession.totalSteps / gameSession.sessionLevelsCompleted) : 0;
+    
+  const survivalRate = gameSession.sessionLevelsCompleted > 0 ? 
+    Math.floor(((gameSession.sessionLevelsCompleted - gameSession.livesLost) / gameSession.sessionLevelsCompleted) * 100) : 100;
+
+  return {
+    character: gameSession.character,
+    sessionLevelsCompleted: gameSession.sessionLevelsCompleted,
+    sessionTime: sessionTime,
+    totalSteps: gameSession.totalSteps,
+    sessionEnemiesDefeated: gameSession.sessionEnemiesDefeated,
+    mazeTokensEarned: gameSession.mazeTokensEarned,
+    livesLost: gameSession.livesLost,
+    perfectRuns: gameSession.perfectRuns,
+    speedBonuses: gameSession.speedBonuses,
+    averageTimePerLevel: averageTimePerLevel,
+    averageStepsPerLevel: averageStepsPerLevel,
+    survivalRate: survivalRate,
+    achievements: gameSession.achievements,
+    finalLevel: gameState.currentLevel,
+    gameStatus: gameState.currentLevel > gameState.MAX_LEVELS ? 'COMPLETED' : 'IN_PROGRESS',
+    // Overall player stats
+    totalLevelsCompleted: playerData.totalLevelsCompleted,
+    totalEnemiesDefeated: playerData.totalEnemiesDefeated,
+    bestTimeRecord: playerData.bestTimeRecord,
+    totalMazeTokens: playerData.mazeTokens
+  };
+}
+
+
+
+// Show share score modal with image generation
+function showShareScore() {
+  gameSession.endTime = Date.now();
+  const report = generateScoreReport();
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.display = 'block';
+  modal.innerHTML = `
+    <div class="modal-content character-modal">
+      <span class="close" onclick="closeShareModal()">&times;</span>
+      <div class="share-content">
+        <h2>🏆 Share Your Score</h2>
+        <div class="score-summary">
+          <div class="score-header">
+            <h3>${report.gameStatus === 'COMPLETED' ? '🏆 Game Mastered!' : `📈 Level ${report.finalLevel} Reached`}</h3>
+            <p>Character: ${report.character}</p>
+          </div>
+          
+          <div class="score-stats">
+            <div class="stat-grid">
+              <div class="stat-item">
+                <span class="stat-value">${report.finalLevel}</span>
+                <span class="stat-label">Current Level</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${Math.floor(report.sessionTime / 60)}:${(report.sessionTime % 60).toString().padStart(2, '0')}</span>
+                <span class="stat-label">Session Time</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${report.sessionEnemiesDefeated}</span>
+                <span class="stat-label">Enemies Killed</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${report.mazeTokensEarned}</span>
+                <span class="stat-label">MAZE Earned</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${report.totalLevelsCompleted}</span>
+                <span class="stat-label">Best Level</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">${report.totalMazeTokens}</span>
+                <span class="stat-label">Total MAZE</span>
+              </div>
+            </div>
+          </div>
+          
+          ${report.achievements.length > 0 ? `
+            <div class="achievements-list">
+              <h4>🏆 Session Achievements</h4>
+              <div class="achievement-tags">
+                ${report.achievements.slice(-3).map(achievement => 
+                  `<span class="achievement-tag">${achievement}</span>`
+                ).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+        
+        <div class="share-options">
+          <canvas id="scoreCanvas" width="800" height="600" style="display: none;"></canvas>
+          <div class="image-preview" id="imagePreview">
+            <p>Generating score image...</p>
+          </div>
+          <div class="share-buttons">
+            <button class="share-btn download-btn" onclick="downloadScoreImage()">💾 Download Image</button>
+            <button class="share-btn copy-btn" onclick="copyImageToClipboard()">📋 Copy Image</button>
+            <button class="share-btn twitter-btn" onclick="shareImageToTwitter()">🐦 Share on X</button>
+            <button class="share-btn facebook-btn" onclick="shareImageToFacebook()">📘 Share on Facebook</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Generate the score image
+  setTimeout(() => generateScoreImage(report), 100);
+}
+
+// Generate score image
+function generateScoreImage(report) {
+  const canvas = document.getElementById('scoreCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Set canvas size
+  canvas.width = 800;
+  canvas.height = 600;
+  
+  // Create gradient background
+  const gradient = ctx.createLinearGradient(0, 0, 800, 600);
+  gradient.addColorStop(0, '#1a1a1a');
+  gradient.addColorStop(0.5, '#2d1810');
+  gradient.addColorStop(1, '#1a1a1a');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 800, 600);
+  
+  // Add border
+  ctx.strokeStyle = '#FFD700';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10, 10, 780, 580);
+  
+  // Title
+  ctx.fillStyle = '#FFD700';
+  ctx.font = 'bold 36px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('🏴‍☠️ Treasure Maze Adventure', 400, 60);
+  
+  // Status
+  const statusText = report.gameStatus === 'COMPLETED' ? '🏆 Game Mastered!' : `📈 Level ${report.finalLevel} Reached`;
+  ctx.font = 'bold 24px Arial';
+  ctx.fillStyle = '#FFA500';
+  ctx.fillText(statusText, 400, 100);
+  
+  // Character
+  ctx.font = '20px Arial';
+  ctx.fillStyle = '#FFD700';
+  ctx.fillText(`Character: ${report.character}`, 400, 130);
+  
+  // Stats grid
+  const stats = [
+    { label: 'Current Level', value: report.finalLevel, icon: '📈' },
+    { label: 'Session Time', value: `${Math.floor(report.sessionTime / 60)}:${(report.sessionTime % 60).toString().padStart(2, '0')}`, icon: '⏱️' },
+    { label: 'Enemies Killed', value: report.sessionEnemiesDefeated, icon: '💀' },
+    { label: 'MAZE Earned', value: report.mazeTokensEarned, icon: '🧩' },
+    { label: 'Best Level', value: report.totalLevelsCompleted, icon: '🏆' },
+    { label: 'Total MAZE', value: report.totalMazeTokens, icon: '💎' }
+  ];
+  
+  // Draw stats in 2x3 grid
+  const startY = 180;
+  const boxWidth = 240;
+  const boxHeight = 100;
+  const spacing = 20;
+  
+  for (let i = 0; i < stats.length; i++) {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = 40 + col * (boxWidth + spacing);
+    const y = startY + row * (boxHeight + spacing);
+    
+    // Draw stat box
+    ctx.fillStyle = 'rgba(255, 140, 0, 0.2)';
+    ctx.fillRect(x, y, boxWidth, boxHeight);
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, boxWidth, boxHeight);
+    
+    // Icon and value
+    ctx.font = 'bold 32px Arial';
+    ctx.fillStyle = '#FFD700';
+    ctx.textAlign = 'center';
+    ctx.fillText(stats[i].icon, x + boxWidth/2, y + 35);
+    
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText(stats[i].value, x + boxWidth/2, y + 60);
+    
+    ctx.font = '14px Arial';
+    ctx.fillStyle = '#FFA500';
+    ctx.fillText(stats[i].label, x + boxWidth/2, y + 80);
+  }
+  
+  // Achievements section
+  if (report.achievements.length > 0) {
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏆 Session Achievements', 400, 520);
+    
+    const achievementText = report.achievements.slice(-2).join(' • ');
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#FFA500';
+    ctx.fillText(achievementText, 400, 545);
+  }
+  
+  // Footer
+  ctx.fillStyle = '#FFD700';
+  ctx.font = '14px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('#TreasureMazeAdventure #MazeGame', 400, 575);
+  
+  // Show the generated image
+  const imagePreview = document.getElementById('imagePreview');
+  const img = document.createElement('img');
+  img.src = canvas.toDataURL();
+  img.style.maxWidth = '100%';
+  img.style.border = '2px solid #FFD700';
+  img.style.borderRadius = '10px';
+  imagePreview.innerHTML = '';
+  imagePreview.appendChild(img);
+}
+
+// Image sharing functions
+function downloadScoreImage() {
+  const canvas = document.getElementById('scoreCanvas');
+  const link = document.createElement('a');
+  link.download = `treasure-maze-score-${new Date().toISOString().split('T')[0]}.png`;
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+function copyImageToClipboard() {
+  const canvas = document.getElementById('scoreCanvas');
+  canvas.toBlob(blob => {
+    const item = new ClipboardItem({ 'image/png': blob });
+    navigator.clipboard.write([item]).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      const originalText = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      btn.style.background = '#27ae60';
+      
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+      }, 2000);
+    }).catch(err => {
+      alert('Could not copy image to clipboard. Please download instead.');
+    });
+  });
+}
+
+function shareImageToTwitter() {
+  // Generate a text-based tweet since X/Twitter doesn't support direct image sharing from web
+  const report = generateScoreReport();
+  const text = `🏴‍☠️ Just played Treasure Maze Adventure!\n\n` +
+    `📈 Reached Level ${report.finalLevel}\n` +
+    `👤 Character: ${report.character}\n` +
+    `🧩 MAZE Tokens: ${report.mazeTokensEarned} earned\n` +
+    `💀 Enemies Defeated: ${report.sessionEnemiesDefeated}\n` +
+    `⏱️ Session Time: ${Math.floor(report.sessionTime / 60)}:${(report.sessionTime % 60).toString().padStart(2, '0')}\n\n` +
+    `#TreasureMazeAdventure #MazeGame #Gaming`;
+  
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+function shareImageToFacebook() {
+  // Facebook sharing - opens Facebook with a link to share
+  const report = generateScoreReport();
+  const text = `🏴‍☠️ Just played Treasure Maze Adventure! Reached Level ${report.finalLevel} with ${report.character}! 🎮 #TreasureMazeAdventure #MazeGame`;
+  
+  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+
+
+function closeShareModal() {
+  const modal = document.querySelector('.modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Add CSS for share modal
+const shareStyle = document.createElement('style');
+shareStyle.textContent = `
+  .share-content h2 {
+    text-align: center;
+    color: #FFD700;
+    margin-bottom: 20px;
+  }
+  
+  .score-summary {
+    background: rgba(255, 140, 0, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+  }
+  
+  .score-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .score-header h3 {
+    color: #FFD700;
+    font-size: 1.5em;
+    margin: 0 0 10px 0;
+  }
+  
+  .score-header p {
+    color: #FFA500;
+    margin: 0;
+    font-style: italic;
+  }
+  
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .stat-item {
+    text-align: center;
+    background: rgba(255, 140, 0, 0.2);
+    border-radius: 10px;
+    padding: 15px 10px;
+    border: 1px solid #FFD700;
+  }
+  
+  .stat-value {
+    display: block;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #FFD700;
+    margin-bottom: 5px;
+  }
+  
+  .stat-label {
+    font-size: 0.9em;
+    color: #FFA500;
+    text-transform: uppercase;
+  }
+  
+  .achievements-list h4 {
+    color: #FFD700;
+    margin: 15px 0 10px 0;
+    text-align: center;
+  }
+  
+  .achievement-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .achievement-tag {
+    background: linear-gradient(145deg, #FFD700, #FFA500);
+    color: #000;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    border: 1px solid #FF8C00;
+  }
+  
+  .image-preview {
+    width: 100%;
+    min-height: 200px;
+    background: rgba(26, 26, 26, 0.9);
+    border: 2px solid #FF8C00;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFD700;
+  }
+  
+  .image-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .share-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  
+  .share-btn {
+    background: linear-gradient(145deg, #FF8C00, #FF6347);
+    border: 2px solid #FFD700;
+    color: #000;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 140, 0, 0.4);
+    background: linear-gradient(145deg, #FFA500, #FF8C00);
+  }
+  
+  .twitter-btn {
+    background: linear-gradient(145deg, #1DA1F2, #0d8bd9);
+    color: white;
+  }
+  
+  .facebook-btn {
+    background: linear-gradient(145deg, #4267B2, #365899);
+    color: white;
+  }
+  
+  .download-btn {
+    background: linear-gradient(145deg, #27ae60, #219a52);
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    .stat-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .share-buttons {
+      grid-template-columns: 1fr;
+    }
+    
+    .achievement-tags {
+      justify-content: flex-start;
+    }
+  }
+`;
+document.head.appendChild(shareStyle);
+
+// Make necessary functions available globally for HTML event handlers
+window.closeModal = function() {
+  document.getElementById('instructionsModal').style.display = 'none';
+  document.getElementById('creditsModal').style.display = 'none';
+  document.getElementById('characterModal').style.display = 'none';
+  document.getElementById('profileModal').style.display = 'none';
+  document.getElementById('weaponModal').style.display = 'none';
+  document.getElementById('soundModal').style.display = 'none';
+};
+
+window.movePlayer = movePlayer;
+window.shoot = shoot;
+window.nextLevelNew = nextLevelNew;
+window.showShareScore = showShareScore;
+window.returnToMainMenu = returnToMainMenu;
+window.restartGame = restartGame;
+window.purchaseCharacter = purchaseCharacter;
+window.selectCharacter = selectCharacter;
+window.downloadScoreImage = downloadScoreImage;
+window.copyImageToClipboard = copyImageToClipboard;
+window.shareImageToTwitter = shareImageToTwitter;
+window.shareImageToFacebook = shareImageToFacebook;
+window.closeShareModal = closeShareModal;
+window.rewardEnemyKill = rewardEnemyKill;
+window.showWeaponSelect = showWeaponSelect;
+window.selectWeapon = selectWeapon;
+window.purchaseWeapon = purchaseWeapon;
+window.showSoundSettings = showSoundSettings;
+window.toggleMusicSetting = toggleMusicSetting;
+window.toggleSFXSetting = toggleSFXSetting;
+window.updateMasterVolume = updateMasterVolume;
+window.updateMusicVolume = updateMusicVolume;
+window.updateSFXVolume = updateSFXVolume;
+
+// Weapon selection functions
+function renderWeaponGrid() {
+  const grid = document.getElementById('weaponGrid');
+  grid.innerHTML = '';
+  
+  Object.entries(weaponCategories).forEach(([weaponId, weapon]) => {
+    const isUnlocked = playerData.unlockedWeapons.includes(weaponId);
+    const isSelected = playerData.selectedWeapon === weaponId;
+    const canAfford = playerData.mazeTokens >= weapon.price;
+    
+    const card = document.createElement('div');
+    card.className = `character-card ${isSelected ? 'selected' : ''} ${!isUnlocked ? 'locked' : ''}`;
+    
+    const weaponIcon = getWeaponIcon(weaponId);
+    const rarityClass = getRarityClass(weapon.rarity);
+    
+    card.innerHTML = `
+      <div class="character-avatar">${weaponIcon}</div>
+      <div class="character-name">${weapon.name}</div>
+      <div class="character-rarity ${rarityClass}">${weapon.rarity.toUpperCase()}</div>
+      <div class="character-ability">${weapon.description}</div>
+      <div class="weapon-stats">
+        <small>Ammo: ${weapon.ammoCapacity} | Speed: ${weapon.projectileSpeed}</small>
+      </div>
+      ${!isUnlocked ? `
+        <div class="character-price">🧩 ${weapon.price} MAZE</div>
+        <button class="purchase-btn" ${!canAfford ? 'disabled' : ''} onclick="purchaseWeapon('${weaponId}')">
+          ${canAfford ? 'Purchase' : 'Not enough MAZE'}
+        </button>
+      ` : isSelected ? `
+        <div style="color: #FFD700; font-weight: bold; margin-top: 10px;">✓ EQUIPPED</div>
+      ` : `
+        <button class="purchase-btn" onclick="selectWeapon('${weaponId}')">Equip</button>
+      `}
+    `;
+    
+    grid.appendChild(card);
+  });
+}
+
+function getWeaponIcon(weaponId) {
+  const icons = {
+    basic: '🔫',
+    legendary: '⚡',
+    mage: '🔮',
+    sage: '🌟'
+  };
+  return icons[weaponId] || '⚔️';
+}
+
+function getRarityClass(rarity) {
+  return `rarity-${rarity}`;
+}
+
+function selectWeapon(weaponId) {
+  playerData.selectedWeapon = weaponId;
+  gameState.weaponSystem.setWeapon(weaponId);
+  savePlayerData();
+  renderWeaponGrid();
+  updateCurrencyDisplay();
+  updateProfileDisplay();
+}
+
+function purchaseWeapon(weaponId) {
+  const weapon = weaponCategories[weaponId];
+  if (playerData.mazeTokens >= weapon.price) {
+    playerData.mazeTokens -= weapon.price;
+    playerData.unlockedWeapons.push(weaponId);
+    savePlayerData();
+    renderWeaponGrid();
+    updateWeaponCurrencyDisplay();
+    updateCurrencyDisplay();
+    updateProfileDisplay();
+  }
+}
+
+function updateWeaponCurrencyDisplay() {
+  if (document.getElementById('weaponMazeTokens')) {
+    document.getElementById('weaponMazeTokens').textContent = playerData.mazeTokens;
+  }
+}
+
+// Make weapon functions available globally
+window.showWeaponSelect = showWeaponSelect;
+window.selectWeapon = selectWeapon;
+window.purchaseWeapon = purchaseWeapon;
+
+// Add enemy kill rewards system
+function rewardEnemyKill(enemy, x, y) {
+  // Enhanced MAZE token reward based on enemy type and rarity
+  let mazeReward = 0;
+  let ammoReward = 0;
+  let healthReward = false;
+  
+  // Base rewards by enemy type
+  const enemyTypeData = ENEMY_TYPES[enemy.type] || ENEMY_TYPES[enemy.originalType];
+  if (enemyTypeData) {
+    // Base reward calculation
+    switch(enemyTypeData.rarity) {
+      case 'common':
+        mazeReward = 1;
+        ammoReward = 1;
+        break;
+      case 'uncommon':
+        mazeReward = 2;
+        ammoReward = 2;
+        healthReward = Math.random() < 0.2; // 20% chance
+        break;
+      case 'rare':
+        mazeReward = 4;
+        ammoReward = 3;
+        healthReward = Math.random() < 0.3; // 30% chance
+        break;
+      case 'epic':
+        mazeReward = 7;
+        ammoReward = 4;
+        healthReward = Math.random() < 0.4; // 40% chance
+        break;
+      case 'legendary':
+        mazeReward = 12;
+        ammoReward = 6;
+        healthReward = Math.random() < 0.6; // 60% chance
+        break;
+    }
+    
+    // Additional rewards based on specific enemy types
+    switch(enemy.type) {
+      case 'tank':
+        ammoReward += 2; // Tanks drop more ammo
+        break;
+      case 'berserker':
+        mazeReward += 2; // Berserkers give bonus MAZE
+        break;
+      case 'sentinel':
+        healthReward = true; // Sentinels always give health
+        break;
+      case 'overlord':
+        mazeReward += 5; // Overlords give massive bonus
+        ammoReward += 3;
+        break;
+      case 'nightmare':
+        mazeReward += 8; // Nightmares give ultimate bonus
+        ammoReward += 5;
+        healthReward = true;
+        break;
+      case 'chaser':
+        mazeReward += 1; // Chasers give bonus MAZE for persistence
+        break;
+      case 'dodger':
+        ammoReward += 1; // Dodgers drop extra ammo
+        break;
+      case 'ninja':
+        mazeReward += 2; // Ninjas give stealth bonus
+        healthReward = Math.random() < 0.25; // 25% chance for health
+        break;
+      case 'melee':
+        ammoReward += 2; // Melee fighters drop more ammo
+        healthReward = Math.random() < 0.3; // 30% chance for health
+        break;
+      case 'elite_chaser':
+        mazeReward += 3; // Elite chasers give bigger bonus
+        ammoReward += 1;
+        break;
+      case 'shadow_dodger':
+        mazeReward += 3; // Shadow dodgers are valuable
+        ammoReward += 2;
+        healthReward = Math.random() < 0.35; // 35% chance
+        break;
+      case 'master_ninja':
+        mazeReward += 5; // Master ninjas give massive bonus
+        ammoReward += 3;
+        healthReward = Math.random() < 0.5; // 50% chance
+        break;
+      case 'berserker_melee':
+        mazeReward += 4; // Berserker melees give big bonus
+        ammoReward += 4; // Lots of ammo
+        healthReward = Math.random() < 0.4; // 40% chance
+        break;
+      case 'apex_hunter':
+        mazeReward += 8; // Apex hunters give ultimate bonus
+        ammoReward += 5;
+        healthReward = true; // Always give health
+        break;
+      case 'void_guardian':
+        mazeReward += 10; // Void guardians give maximum bonus
+        ammoReward += 6;
+        healthReward = true; // Always give health
+        break;
+    }
+  } else {
+    // Fallback for legacy enemies
+    switch(enemy.type) {
+      case 'scout':
+        mazeReward = 1;
+        ammoReward = 1;
+        break;
+      case 'hunter':
+        mazeReward = 2;
+        ammoReward = 2;
+        break;
+      case 'guardian':
+        mazeReward = 3;
+        ammoReward = 1;
+        healthReward = Math.random() < 0.3;
+        break;
+      case 'tank':
+        mazeReward = 4;
+        ammoReward = 3;
+        healthReward = Math.random() < 0.5;
+        break;
+      case 'assassin':
+        mazeReward = 5;
+        ammoReward = 2;
+        healthReward = Math.random() < 0.4;
+        break;
+    }
+  }
+  
+  // Level multiplier for higher levels
+  const levelMultiplier = 1 + Math.floor(gameState.currentLevel / 10) * 0.5;
+  mazeReward = Math.ceil(mazeReward * levelMultiplier);
+  
+  // Character bonus
+  const character = getCurrentCharacter();
+  if (character.id === 'legend') {
+    mazeReward *= 2;
+    ammoReward *= 2;
+  }
+  
+  // Award MAZE tokens
+  if (mazeReward > 0) {
+    playerData.mazeTokens += mazeReward;
+    gameSession.mazeTokensEarned += mazeReward;
+    
+    // Show floating reward text
+    showFloatingReward(x, y, `+${mazeReward} 🧩`, '#FFD700');
+  }
+  
+  // Award ammo
+  if (ammoReward > 0) {
+    const currentAmmo = gameState.weaponSystem.getAmmo();
+    const weaponConfig = gameState.weaponSystem.getCurrentWeapon();
+    const newAmmo = Math.min(currentAmmo + ammoReward, weaponConfig.ammoCapacity + 10); // Allow slight overflow
+    gameState.weaponSystem.setAmmo(newAmmo);
+    
+    // Show floating ammo reward
+    showFloatingReward(x, y - 20, `+${ammoReward} 🔫`, '#00FF00');
+  }
+  
+  // Award health restoration
+  if (healthReward && gameState.playerLives < 3) {
+    gameState.playerLives++;
+    showFloatingReward(x, y - 40, '+1 ❤️', '#FF69B4');
+  }
+  
+  // Update displays
+  savePlayerData();
+  updateCurrencyDisplay();
+  updateGameInfo();
+}
+
+// Add floating reward text system
+function showFloatingReward(x, y, text, color) {
+  const floatingText = {
+    x: x,
+    y: y,
+    text: text,
+    color: color,
+    life: 60,
+    maxLife: 60,
+    vy: -2
+  };
+  
+  if (!gameState.floatingTexts) {
+    gameState.floatingTexts = [];
+  }
+  
+  gameState.floatingTexts.push(floatingText);
+}
+
+// Update floating texts
+function updateFloatingTexts() {
+  if (!gameState.floatingTexts) return;
+  
+  gameState.floatingTexts = gameState.floatingTexts.filter(text => text.life > 0);
+  
+  gameState.floatingTexts.forEach(text => {
+    text.y += text.vy;
+    text.life--;
+    
+    // Draw the floating text
+    const alpha = text.life / text.maxLife;
+    gameState.ctx.globalAlpha = alpha;
+    gameState.ctx.fillStyle = text.color;
+    gameState.ctx.font = 'bold 16px Arial';
+    gameState.ctx.textAlign = 'center';
+    gameState.ctx.fillText(text.text, text.x, text.y);
+    gameState.ctx.globalAlpha = 1;
+  });
+}
+
+// Character sprite loading system
+const characterSprites = {};
+
+// Load character sprites
+function loadCharacterSprites() {
+  characters.forEach(character => {
+    if (character.sprite) {
+      characterSprites[character.id] = {
+        idle: new Image(),
+        walk: new Image(),
+        attack: new Image(),
+        hurt: new Image(),
+        cast: new Image() // Added for Wraith spell casting
+      };
+      
+      // Load idle sprite
+      characterSprites[character.id].idle.src = character.sprite;
+      characterSprites[character.id].idle.onload = () => {
+        console.log(`✅ Loaded ${character.name} idle sprite`);
+      };
+      characterSprites[character.id].idle.onerror = () => {
+        console.warn(`❌ Failed to load ${character.name} idle sprite`);
+      };
+      
+      // Load walk sprite if available
+      if (character.walkSprite) {
+        characterSprites[character.id].walk.src = character.walkSprite;
+      }
+      
+      // Load attack sprite if available
+      if (character.attackSprite) {
+        characterSprites[character.id].attack.src = character.attackSprite;
+      }
+      
+      // Load hurt sprite if available
+      if (character.hurtSprite) {
+        characterSprites[character.id].hurt.src = character.hurtSprite;
+      }
+      
+      // Load cast sprite if available (for Wraith characters)
+      if (character.castSprite) {
+        characterSprites[character.id].cast.src = character.castSprite;
+        characterSprites[character.id].cast.onload = () => {
+          console.log(`✅ Loaded ${character.name} cast sprite`);
+        };
+        characterSprites[character.id].cast.onerror = () => {
+          console.warn(`❌ Failed to load ${character.name} cast sprite`);
+        };
+      }
+    }
+  });
+}
+
+// Initialize character sprites when page loads
+loadCharacterSprites();
+
+// Initialize SIGN token system and integrate with victory function
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🪙 Initializing SIGN token system...');
+  
+  // Initialize SIGN token manager
+  if (typeof SignTokenManager !== 'undefined') {
+    window.signTokenManager = new SignTokenManager();
+    console.log('✅ SIGN Token Manager initialized');
+  }
+  
+  // Initialize token display
+  if (typeof TokenDisplay !== 'undefined') {
+    window.tokenDisplay = new TokenDisplay();
+    console.log('✅ Token Display initialized');
+  }
+  
+  // Add SIGN token to game HUD after short delay
+  setTimeout(() => {
+    if (window.tokenDisplay && typeof window.tokenDisplay.addTokenHUD === 'function') {
+      window.tokenDisplay.addTokenHUD();
+      console.log('✅ SIGN token HUD added');
+    }
+  }, 1000);
+});
+
+// Initialize withdrawal interface
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof WithdrawalInterface !== 'undefined') {
+    window.withdrawalInterface = new WithdrawalInterface();
+    console.log('✅ Withdrawal Interface initialized');
+  }
+});
+
+// Make withdrawal function globally available
+function openWithdrawalModal() {
+  if (window.withdrawalInterface) {
+    window.withdrawalInterface.openWithdrawalModal();
+  } else {
+    alert('❌ Withdrawal interface not available');
+  }
+}
+
+// Add MAZE token to MetaMask
+async function addMazeTokenToWallet() {
+  try {
+    if (!window.ethereum) {
+      alert('❌ MetaMask not detected');
+      return;
+    }
+
+    const tokenInfo = await window.mazeContract?.getTokenInfo();
+    if (!tokenInfo) {
+      alert('❌ MAZE contract not available');
+      return;
+    }
+
+    const wasAdded = await window.ethereum.request({
+      method: 'wallet_watchAsset',
+      params: {
+        type: 'ERC20',
+        options: {
+          address: tokenInfo.contractAddress,
+          symbol: tokenInfo.symbol,
+          decimals: tokenInfo.decimals,
+          image: '', // You can add a token logo URL here
+        },
+      },
+    });
+
+    if (wasAdded) {
+      alert('✅ MAZE token added to wallet!');
+    } else {
+      alert('⚠️ MAZE token was not added');
+    }
+  } catch (error) {
+    console.error('❌ Error adding MAZE token:', error);
+    alert('❌ Failed to add MAZE token to wallet');
+  }
+}
+
+// Make functions globally available
+window.openWithdrawalModal = openWithdrawalModal;
+window.addMazeTokenToWallet = addMazeTokenToWallet;
+</script>
+
+<!-- Include external player management script -->
+<script src="players.js"></script>
+<script src="audio.js"></script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treasure Maze Adventure - Main Menu</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 50%, #1a1a1a 100%);
+      font-family: 'Arial', sans-serif;
+      color: #FFD700;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .main-menu {
+      text-align: center;
+      max-width: 800px;
+    }
+    
+    .main-menu h1 {
+      font-size: 4em;
+      margin-bottom: 20px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+      background: linear-gradient(45deg, #FF8C00, #FFD700, #FFA500, #FF6347);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 20px rgba(255, 140, 0, 0.6)); }
+      to { filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.9)); }
+    }
+    
+    .subtitle {
+      font-size: 1.5em;
+      margin-bottom: 40px;
+      opacity: 0.9;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 30px;
+      align-items: center;
+    }
+    
+    .menu-btn {
+      background: linear-gradient(145deg, #FF8C00, #FF6347);
+      border: 2px solid #FFD700;
+      padding: 15px 40px;
+      border-radius: 30px;
+      color: #000000;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.5);
+      transition: all 0.3s;
+      min-width: 200px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .menu-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 20px rgba(255, 140, 0, 0.4);
+      background: linear-gradient(145deg, #FFA500, #FF8C00);
+      border-color: #FFD700;
+    }
+    
+    .menu-btn:active {
+      transform: translateY(-1px);
+    }
+    
+    .menu-btn.start-btn {
+      background: linear-gradient(145deg, #FFD700, #FFA500);
+      font-size: 20px;
+      padding: 18px 45px;
+      border: 3px solid #FF8C00;
+      color: #000000;
+      font-weight: 900;
+    }
+    
+    .menu-btn.start-btn:hover {
+      background: linear-gradient(145deg, #FFA500, #FFD700);
+      box-shadow: 0 15px 25px rgba(255, 215, 0, 0.5);
+    }
+    
+    .menu-btn.instructions-btn {
+      background: linear-gradient(145deg, #FF6347, #FF4500);
+      border: 2px solid #FFD700;
+    }
+    
+    .menu-btn.instructions-btn:hover {
+      background: linear-gradient(145deg, #FF4500, #FF6347);
+    }
+    
+    .menu-btn.credits-btn {
+      background: linear-gradient(145deg, #2F1B14, #1a1a1a);
+      border: 2px solid #FF8C00;
+      color: #FFD700;
+    }
+    
+    .menu-btn.credits-btn:hover {
+      background: linear-gradient(145deg, #1a1a1a, #2F1B14);
+      color: #FFA500;
+    }
+    
+    .game-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    
+    .feature-card {
+      background: rgba(255, 140, 0, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      text-align: center;
+      transition: all 0.3s;
+    }
+    
+    .feature-card:hover {
+      border-color: #FFD700;
+      background: rgba(255, 140, 0, 0.2);
+      transform: translateY(-5px);
+    }
+    
+    .feature-card h3 {
+      margin-top: 0;
+      color: #FFD700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    @media (max-width: 480px) {
+      .main-menu h1 {
+        font-size: 2.5em;
+      }
+      
+      .menu-btn {
+        padding: 12px 30px;
+        font-size: 16px;
+      }
+      
+      .game-features {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-menu">
+  <h1>🏴‍☠️ Treasure Maze Adventure</h1>
+  <p class="subtitle">Navigate through dangerous mazes and find the treasure!</p>
+  
+  <div class="menu-buttons">
+    <a href="index.html" class="menu-btn start-btn">🎮 Start Adventure</a>
+    <a href="leaderboard.html" class="menu-btn leaderboard-btn">🏆 Leaderboard</a>
+    <button class="menu-btn instructions-btn" onclick="alert('Use arrow keys to move, spacebar to shoot, and find the treasure chest to advance!')">📖 How to Play</button>
+    <button class="menu-btn credits-btn" onclick="alert('Enhanced Maze Adventure\\nBuilt with HTML5 Canvas, JavaScript, and CSS3\\nFeatures intelligent AI, particle effects, and responsive design')">👨‍💻 Credits</button>
+  </div>
+  
+  <div class="game-features">
+    <div class="feature-card">
+      <h3>🎯 Multiple Levels</h3>
+      <p>Challenge yourself through increasingly difficult mazes</p>
+    </div>
+    <div class="feature-card">
+      <h3>👹 Smart Enemies</h3>
+      <p>AI enemies that patrol and chase you when detected</p>
+    </div>
+    <div class="feature-card">
+      <h3>🔫 Combat System</h3>
+      <p>Shoot projectiles to defeat enemies in your path</p>
+    </div>
+    <div class="feature-card">
+      <h3>📱 Touch Controls</h3>
+      <p>Play on any device with responsive controls</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html> 
