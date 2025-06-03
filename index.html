@@ -256,6 +256,14 @@
       animation-delay: -3.5s;
     }
     
+    .menu-btn.leaderboard-btn {
+      background: linear-gradient(145deg, rgba(255, 215, 0, 0.9), rgba(255, 140, 0, 0.9));
+      border: 3px solid #FF8C00;
+      color: #000000;
+      animation-delay: -0.5s;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+    
     .game-features {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1629,6 +1637,11 @@
       <span class="btn-text">Start Adventure</span>
       <div class="btn-glow"></div>
     </button>
+    <button class="menu-btn leaderboard-btn" id="leaderboardBtn">
+      <span class="btn-icon">🏆</span>
+      <span class="btn-text">Leaderboard</span>
+      <div class="btn-glow"></div>
+    </button>
     <button class="menu-btn character-btn" id="characterSelectBtn">
       <span class="btn-icon">👤</span>
       <span class="btn-text">Select Character</span>
@@ -2120,6 +2133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('soundBtn').addEventListener('click', showSoundSettings);
   document.getElementById('instructionsBtn').addEventListener('click', showInstructions);
   document.getElementById('creditsBtn').addEventListener('click', showCredits);
+  document.getElementById('leaderboardBtn').addEventListener('click', showLeaderboard);
   document.getElementById('backToMenuBtn').addEventListener('click', backToMenu);
   
   // Add hover sound effects to all menu buttons
@@ -4615,6 +4629,11 @@ async function addMazeTokenToWallet() {
 // Make functions globally available
 window.openWithdrawalModal = openWithdrawalModal;
 window.addMazeTokenToWallet = addMazeTokenToWallet;
+
+function showLeaderboard() {
+  // Open leaderboard in a new window/tab
+  window.open('leaderboard.html', '_blank');
+}
 </script>
 
 <!-- Include external player management script -->
