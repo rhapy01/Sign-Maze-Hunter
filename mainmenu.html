@@ -115,6 +115,7 @@
       color: #FFA500;
     }
     
+    /* Special styling for leaderboard button */
     .menu-btn.leaderboard-btn {
       background: linear-gradient(145deg, #4169E1, #1E90FF);
       border: 2px solid #FFD700;
@@ -123,7 +124,19 @@
     
     .menu-btn.leaderboard-btn:hover {
       background: linear-gradient(145deg, #1E90FF, #4169E1);
-      box-shadow: 0 15px 25px rgba(65, 105, 225, 0.5);
+      box-shadow: 0 12px 20px rgba(65, 105, 225, 0.4);
+    }
+    
+    /* Profile button styling */
+    .menu-btn.profile-btn {
+      background: linear-gradient(145deg, #32CD32, #228B22);
+      border: 2px solid #FFD700;
+      color: #FFFFFF;
+    }
+    
+    .menu-btn.profile-btn:hover {
+      background: linear-gradient(145deg, #228B22, #32CD32);
+      box-shadow: 0 12px 20px rgba(50, 205, 50, 0.4);
     }
     
     .game-features {
@@ -179,6 +192,7 @@
   
   <div class="menu-buttons">
     <a href="index.html" class="menu-btn start-btn">🎮 Start Adventure</a>
+    <a href="profile.html" class="menu-btn profile-btn">👤 Profile</a>
     <a href="leaderboard.html" class="menu-btn leaderboard-btn">🏆 Leaderboard</a>
     <button class="menu-btn instructions-btn" onclick="alert('Use arrow keys to move, spacebar to shoot, and find the treasure chest to advance!')">📖 How to Play</button>
     <button class="menu-btn credits-btn" onclick="alert('Enhanced Maze Adventure\\nBuilt with HTML5 Canvas, JavaScript, and CSS3\\nFeatures intelligent AI, particle effects, and responsive design')">👨‍💻 Credits</button>
