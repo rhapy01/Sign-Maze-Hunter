@@ -44,8 +44,6 @@ const connectDB = async () => {
             serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
             socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
             // SSL/TLS configuration for MongoDB Atlas
-            ssl: true,
-            sslValidate: true,
             retryWrites: true,
             w: 'majority',
             // Additional options for Render compatibility
@@ -53,11 +51,7 @@ const connectDB = async () => {
             maxPoolSize: 10,
             minPoolSize: 5,
             maxIdleTimeMS: 30000,
-            connectTimeoutMS: 10000,
-            // Force TLS version for compatibility
-            tlsInsecure: false,
-            tlsAllowInvalidCertificates: false,
-            tlsAllowInvalidHostnames: false
+            connectTimeoutMS: 10000
         };
 
         // Fallback options with relaxed SSL (if needed)
@@ -69,8 +63,7 @@ const connectDB = async () => {
             retryWrites: true,
             w: 'majority',
             authSource: 'admin',
-            ssl: true,
-            tlsInsecure: true, // Allow insecure connections as fallback
+            // Use only tlsAllowInvalidCertificates for fallback
             tlsAllowInvalidCertificates: true,
             tlsAllowInvalidHostnames: true
         };
