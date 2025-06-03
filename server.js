@@ -37,16 +37,14 @@ const connectDB = async () => {
             throw new Error('MongoDB connection string not provided in environment variables');
         }
 
-        // Primary connection options with full SSL
+        // Strategy 1: Standard secure connection
         const primaryOptions = {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-            socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-            // SSL/TLS configuration for MongoDB Atlas
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
             retryWrites: true,
             w: 'majority',
-            // Additional options for Render compatibility
             authSource: 'admin',
             maxPoolSize: 10,
             minPoolSize: 5,
@@ -54,7 +52,7 @@ const connectDB = async () => {
             connectTimeoutMS: 10000
         };
 
-        // Fallback options with relaxed SSL (if needed)
+        // Strategy 2: Relaxed SSL validation
         const fallbackOptions = {
             useNewUrlParser: true,
             useUnifiedTopology: true,
@@ -63,20 +61,52 @@ const connectDB = async () => {
             retryWrites: true,
             w: 'majority',
             authSource: 'admin',
-            // Use only tlsAllowInvalidCertificates for fallback
             tlsAllowInvalidCertificates: true,
             tlsAllowInvalidHostnames: true
+        };
+
+        // Strategy 3: No SSL enforcement (last resort)
+        const noSSLOptions = {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+            retryWrites: true,
+            w: 'majority',
+            authSource: 'admin'
         };
 
         try {
             // Try primary connection first
             await mongoose.connect(mongoURI, primaryOptions);
             console.log('✅ Connected to MongoDB successfully (secure connection)');
-        } catch (sslError) {
+            return;
+        } catch (primaryError) {
             console.log('⚠️ Primary SSL connection failed, trying fallback...');
-            // If SSL fails, try with relaxed options
-            await mongoose.connect(mongoURI, fallbackOptions);
-            console.log('✅ Connected to MongoDB successfully (fallback connection)');
+            
+            try {
+                // Try fallback with relaxed SSL
+                await mongoose.connect(mongoURI, fallbackOptions);
+                console.log('✅ Connected to MongoDB successfully (fallback connection)');
+                return;
+            } catch (fallbackError) {
+                console.log('⚠️ Fallback SSL connection failed, trying without SSL...');
+                
+                // Last resort: try with modified URI (remove SSL requirement)
+                const noSSLUri = mongoURI.replace('ssl=true', 'ssl=false').replace('&ssl=true', '');
+                
+                try {
+                    await mongoose.connect(noSSLUri, noSSLOptions);
+                    console.log('✅ Connected to MongoDB successfully (no SSL connection)');
+                    return;
+                } catch (noSSLError) {
+                    console.error('❌ All connection strategies failed');
+                    console.error('Primary error:', primaryError.message);
+                    console.error('Fallback error:', fallbackError.message);
+                    console.error('No SSL error:', noSSLError.message);
+                    throw noSSLError;
+                }
+            }
         }
         
     } catch (error) {
